@@ -209,6 +209,9 @@ async function capturePreviewPage(){
   stream=await navigator.mediaDevices.getDisplayMedia({video:{displaySurface:"browser"},audio:false,preferCurrentTab:true});
   const track=stream.getVideoTracks()[0],surface=track.getSettings().displaySurface;
   if(surface!=="browser")throw Error("Buong screen ang napili. Ulitin ang capture at piliin ang Browser Tab na may Flipbook Sensei.");
+  // Ask the browser for the highest practical tab-capture resolution. Browsers may
+  // ignore this request, so the actual captured dimensions are checked below.
+  try{await track.applyConstraints({width:{ideal:3840},height:{ideal:2160},frameRate:{ideal:30}});}catch(constraintError){console.warn("High-resolution capture constraints were not accepted; keeping native capture size.",constraintError);}
   let regionCropped=false;
   if(window.CropTarget && typeof track.cropTo==="function"){
    try{
@@ -229,15 +232,21 @@ async function capturePreviewPage(){
    height=Math.min(video.videoHeight-y,Math.round(rect.height*sy));
   }
   if(width<100||height<100)throw Error("Hindi makita ang flipbook frame. Piliin ang Browser Tab na may Flipbook Sensei at subukan muli.");
-  const canvas=document.createElement("canvas"),scale=Math.min(1,2200/Math.max(width,height));
-  canvas.width=Math.round(width*scale);canvas.height=Math.round(height*scale);
-  canvas.getContext("2d").drawImage(video,x,y,width,height,0,0,canvas.width,canvas.height);
-  const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/jpeg",.92));if(!blob)throw Error("Hindi nagawa ang screenshot.");
-  selectedPngBlob=await new Promise(resolve=>canvas.toBlob(resolve,"image/png"));if(!selectedPngBlob)throw Error("Hindi naihanda ang image para sa clipboard.");
-  selectedFile=new File([blob],"flipbook-page-"+(Number(el("pageNumber").value)||1)+".jpg",{type:"image/jpeg"});
+  // Preserve every native capture pixel: do not shrink the screenshot to an
+  // arbitrary 2200px limit. PNG avoids JPEG blur around Japanese characters.
+  const canvas=document.createElement("canvas");
+  canvas.width=Math.round(width);canvas.height=Math.round(height);
+  const context=canvas.getContext("2d",{alpha:false});
+  if(!context)throw Error("Hindi mabuksan ang high-resolution canvas.");
+  context.imageSmoothingEnabled=false;
+  context.drawImage(video,x,y,width,height,0,0,canvas.width,canvas.height);
+  const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/png"));if(!blob)throw Error("Hindi nagawa ang screenshot.");
+  selectedPngBlob=blob;
+  selectedFile=new File([blob],"flipbook-page-"+(Number(el("pageNumber").value)||1)+"-"+canvas.width+"x"+canvas.height+".png",{type:"image/png"});
   if(previewUrl)URL.revokeObjectURL(previewUrl);previewUrl=URL.createObjectURL(selectedFile);
   el("previewThumb").src=previewUrl;el("fileLabel").textContent=selectedFile.name;el("imagePreview").classList.add("visible");
-  el("uploadStatus").textContent="Flipbook page captured only. Ready for Google AI Mode.";
+  el("uploadStatus").textContent="HD capture: "+canvas.width+" × "+canvas.height+" px (native tab resolution). Ready for Google AI Mode.";
+  el("googleHandoffStatus").textContent="Screenshot captured at "+canvas.width+" × "+canvas.height+" pixels. The image is saved as lossless PNG; actual 4K detail depends on your display and browser tab capture resolution.";
   await teachSelectedPage();
  }catch(error){
   if(error.name==="NotAllowedError")setAnswer("Kinansela ang screen sharing. Payagan ang Browser Tab capture para makuha ang flipbook lamang.","error");
