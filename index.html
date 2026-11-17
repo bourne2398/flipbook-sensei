@@ -79,6 +79,17 @@ button,input,textarea{font:inherit}button{cursor:pointer}.topbar{height:76px;bor
   .notice { padding: 9px 11px; }
   .question { min-height: 72px; }
 }
+
+/* Adjustable crop frame for HD capture. */
+#previewModal{position:fixed}
+#largeViewer{position:relative}
+#cropOverlay{position:absolute;inset:44px 0 0;z-index:5;display:none;pointer-events:none;background:#0005}
+#cropOverlay.active{display:block}
+#cropBox{position:absolute;border:2px solid #72e0c5;box-shadow:0 0 0 9999px #0006,inset 0 0 0 1px #071a1a;pointer-events:auto;touch-action:none;cursor:move;min-width:80px;min-height:80px}
+.crop-label{position:absolute;left:0;top:-25px;background:#72e0c5;color:#08211f;font:700 10px/20px system-ui;padding:0 7px;white-space:nowrap;border-radius:4px 4px 0 0}
+.crop-handle{position:absolute;width:18px;height:18px;background:#fff;border:3px solid #159b84;border-radius:50%;touch-action:none}
+.crop-handle.nw{left:-9px;top:-9px;cursor:nwse-resize}.crop-handle.ne{right:-9px;top:-9px;cursor:nesw-resize}.crop-handle.sw{left:-9px;bottom:-9px;cursor:nesw-resize}.crop-handle.se{right:-9px;bottom:-9px;cursor:nwse-resize}
+
 </style>
 </head>
 <body>
@@ -100,7 +111,7 @@ button,input,textarea{font:inherit}button{cursor:pointer}.topbar{height:76px;bor
 <div class="footer">Flipbook Sensei · Google AI Mode workflow · No API key required</div>
 </main>
 <div class="modal" id="googleModal" role="dialog" aria-modal="true" aria-label="Teacher lesson script"><div class="modalbar"><span>✦ Teacher Lesson Script</span><div class="modalbar-actions"><button class="modalopen" id="copyImageAndOpenGoogle" type="button">Copy image + prompt</button><button class="modalopen" id="openGoogleAfterCopy" type="button" hidden>Open Google AI ↗</button><button class="modalopen" id="copyPromptModal" type="button">Copy prompt</button><button class="modalclose" type="button" data-close="googleModal" aria-label="Close">×</button></div></div><div class="script-workspace"><div class="script-help" id="googleHandoffStatus">Your flipbook screenshot and teacher prompt are ready. Click “Copy image + prompt &amp; open Google AI”. In Google AI, paste (Ctrl+V) into the message box, then generate. Return to this tab and paste Google's generated teacher script below.</div><section id="pasteScriptPanel" class="paste-script-panel"><label for="googleAnswerInput">Paste Google's generated teacher script</label><textarea id="googleAnswerInput" class="field script-input" placeholder="Paste the complete Tagalog teacher script here…"></textarea><div class="script-actions"><button class="btn btn-primary" id="displayGoogleAnswer" type="button">Display teacher script</button></div></section><section id="teacherScriptPanel" class="teacher-script-panel" hidden><div class="script-actions"><button class="btn btn-secondary" id="editGoogleAnswer" type="button">Paste another answer</button><button class="btn btn-secondary" id="copyGoogleAnswer" type="button">Copy script</button><button class="btn btn-secondary" id="downloadGoogleAnswer" type="button">Download script</button></div><pre id="teacherScriptOutput" class="teacher-script-output"></pre></section></div></div>
-<div class="modal" id="previewModal" role="dialog" aria-modal="true" aria-label="Full-screen flipbook preview"><div class="modalbar"><span>Flipbook preview</span><div class="modalbar-actions"><button class="modalopen capture-btn" id="modalCapturePage" type="button">🔍 Start HD capture</button><button class="modalopen" id="modalCaptureSection" type="button" hidden>Capture section (0)</button><button class="modalopen" id="modalFinishCapture" type="button" hidden>Finish &amp; review</button><button class="modalclose" type="button" data-close="previewModal" aria-label="Close">×</button></div></div><div class="modalframe" id="largeViewer"></div></div>
+<div class="modal" id="previewModal" role="dialog" aria-modal="true" aria-label="Full-screen flipbook preview"><div class="modalbar"><span>Flipbook preview</span><div class="modalbar-actions"><button class="modalopen capture-btn" id="modalCapturePage" type="button">🔍 Start HD capture</button><button class="modalopen" id="modalCaptureSection" type="button" hidden>Capture section (0)</button><button class="modalopen" id="modalFinishCapture" type="button" hidden>Finish &amp; review</button><button class="modalclose" type="button" data-close="previewModal" aria-label="Close">×</button></div></div><div class="modalframe" id="largeViewer"></div><div id="cropOverlay"><div id="cropBox"><span class="crop-label">DRAG TO MOVE · DRAG CORNERS TO RESIZE</span><i class="crop-handle nw" data-handle="nw"></i><i class="crop-handle ne" data-handle="ne"></i><i class="crop-handle sw" data-handle="sw"></i><i class="crop-handle se" data-handle="se"></i></div></div></div>
 <div class="modal" id="captureReviewModal" role="dialog" aria-modal="true" aria-label="Review combined HD capture"><div class="modalbar"><span>✦ HD capture review</span><div class="modalbar-actions"><button class="modalopen" id="copyCombinedImage" type="button">Copy combined image</button><button class="modalopen" id="copyReviewPrompt" type="button">Copy teacher prompt</button><button class="modalopen" id="openGoogleFromReview" type="button">Open Google AI ↗</button><button class="modalclose" type="button" data-close="captureReviewModal" aria-label="Close">×</button></div></div><div class="capture-review-scroll"><div class="capture-review-info" id="captureReviewInfo">Combined HD image preview</div><div class="capture-section-strip" id="captureSectionStrip"></div><div class="capture-composite-wrap"><img id="captureCompositePreview" alt="Combined HD flipbook capture"></div></div></div>
 <script>
 const el=id=>document.getElementById(id);
@@ -203,9 +214,55 @@ async function teachSelectedPage(){
 el("teachButton").addEventListener("click",teachSelectedPage);
 el("copyScript").addEventListener("click",copyTeacherPrompt);
 let hdCaptureStream=null,hdCaptureVideo=null,hdCaptureFrame=null,hdCaptureSections=[];
+let cropRect=null,cropDrag=null;
+
+function getCropBounds(){
+ const area=el("largeViewer").getBoundingClientRect();
+ const frame=el("largeViewer").querySelector("iframe")||el("viewer").querySelector("iframe");
+ return {area,rect:frame?.getBoundingClientRect()};
+}
+function paintCrop(){
+ const {area,rect}=getCropBounds();if(!rect)return;
+ if(!cropRect)cropRect={x:rect.left-area.left+rect.width*.025,y:rect.top-area.top+rect.height*.025,w:rect.width*.95,h:rect.height*.95};
+ const box=el("cropBox");
+ box.style.left=cropRect.x+"px";box.style.top=cropRect.y+"px";box.style.width=cropRect.w+"px";box.style.height=cropRect.h+"px";
+}
+function enableCrop(){paintCrop();el("cropOverlay").classList.add("active");}
+function disableCrop(){el("cropOverlay").classList.remove("active");}
+(function setupCropDragging(){
+ const box=el("cropBox");
+ box.addEventListener("pointerdown",event=>{
+  if(!hdCaptureVideo)return;
+  cropDrag={handle:event.target.dataset.handle||"move",startX:event.clientX,startY:event.clientY,initial:{...cropRect}};
+  box.setPointerCapture(event.pointerId);event.preventDefault();
+ });
+ box.addEventListener("pointermove",event=>{
+  if(!cropDrag)return;
+  const dx=event.clientX-cropDrag.startX,dy=event.clientY-cropDrag.startY,o=cropDrag.initial;
+  const bounds=getCropBounds().area;
+  let x=o.x,y=o.y,w=o.w,h=o.h;
+  if(cropDrag.handle==="move"){x+=dx;y+=dy;}
+  else{
+   if(cropDrag.handle.includes("w")){x+=dx;w-=dx;}
+   if(cropDrag.handle.includes("e"))w+=dx;
+   if(cropDrag.handle.includes("n")){y+=dy;h-=dy;}
+   if(cropDrag.handle.includes("s"))h+=dy;
+  }
+  const min=80;
+  if(w<min){if(cropDrag.handle.includes("w"))x=o.x+o.w-min;w=min;}
+  if(h<min){if(cropDrag.handle.includes("n"))y=o.y+o.h-min;h=min;}
+  x=Math.max(0,Math.min(x,bounds.width-min));y=Math.max(0,Math.min(y,bounds.height-min));
+  w=Math.max(min,Math.min(w,bounds.width-x));h=Math.max(min,Math.min(h,bounds.height-y));
+  cropRect={x,y,w,h};paintCrop();
+ });
+ const finish=()=>{cropDrag=null;};
+ box.addEventListener("pointerup",finish);box.addEventListener("pointercancel",finish);
+ window.addEventListener("resize",()=>{if(el("cropOverlay").classList.contains("active")){cropRect=null;paintCrop();}});
+})();
+
 function stopHDCapture(){
  if(hdCaptureStream)hdCaptureStream.getTracks().forEach(track=>track.stop());
- hdCaptureStream=null;hdCaptureVideo=null;hdCaptureFrame=null;
+ hdCaptureStream=null;hdCaptureVideo=null;hdCaptureFrame=null;disableCrop();
  ["captureSection","finishCapture","modalCaptureSection","modalFinishCapture"].forEach(id=>el(id).hidden=true);
  ["capturePage","modalCapturePage"].forEach(id=>{el(id).disabled=false;el(id).textContent="🔍 Start HD capture";});
 }
@@ -219,19 +276,15 @@ async function startHDCapture(){
   const track=hdCaptureStream.getVideoTracks()[0];
   if(track.getSettings().displaySurface!=="browser")throw Error("Piliin ang Browser Tab na may Flipbook Sensei, hindi buong screen.");
   try{await track.applyConstraints({width:{ideal:3840},height:{ideal:2160},frameRate:{ideal:30}});}catch(e){console.warn("Native capture resolution retained.",e);}
-  let cropped=false;
-  if(window.CropTarget&&typeof track.cropTo==="function"){
-   try{await track.cropTo(await window.CropTarget.fromElement(frame));cropped=true;}catch(e){console.warn("Element crop unavailable; using iframe bounds.",e);}
-  }
   hdCaptureVideo=document.createElement("video");hdCaptureVideo.srcObject=hdCaptureStream;hdCaptureVideo.muted=true;hdCaptureVideo.playsInline=true;await hdCaptureVideo.play();
   if(!hdCaptureVideo.videoWidth)await new Promise(resolve=>hdCaptureVideo.addEventListener("loadedmetadata",resolve,{once:true}));
-  hdCaptureFrame={element:frame,cropped};
+  hdCaptureFrame={element:frame};cropRect=null;enableCrop();
   hdCaptureSections=[];
   button.disabled=false;button.textContent="Capture mode active";el("modalCapturePage").disabled=false;el("modalCapturePage").textContent="Capture mode active";
   ["captureSection","finishCapture","modalCaptureSection","modalFinishCapture"].forEach(id=>el(id).hidden=false);
   el("captureSection").textContent="Capture section (0)";el("modalCaptureSection").textContent="Capture section (0)";
-  el("uploadStatus").textContent="HD mode ready. Zoom in using FlipHTML5's own + control, then capture each visible section.";
-  setAnswer("HD multi-section capture is active. 1) Use the FlipHTML5 zoom (+) control inside the preview. 2) Capture the visible top section. 3) Scroll or pan inside the flipbook to the next section and capture again. 4) Click Finish & combine. Aim for 2–4 sections; keep the zoom level the same.");
+  el("uploadStatus").textContent="HD mode ready. Drag the crop frame to move it and drag its corner handles to resize. Keep it aligned for every section.";
+  setAnswer("Adjust the turquoise crop frame: drag inside it to move, or drag a corner handle to resize. Capture each section, then scroll or pan the flipbook while keeping the crop frame aligned. Click Finish & combine when done.");
  }catch(error){
   stopHDCapture();
   if(error.name==="NotAllowedError")setAnswer("Kinansela ang tab capture. Payagan ang Browser Tab capture.","error");
@@ -242,17 +295,16 @@ async function captureHDSection(){
  if(!hdCaptureVideo||!hdCaptureFrame)return;
  try{
   const video=hdCaptureVideo,frame=hdCaptureFrame;
+  const area=el("largeViewer").getBoundingClientRect();if(!cropRect)paintCrop();
+  const selected={...cropRect};disableCrop();
   await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
-  let x=0,y=0,w=video.videoWidth,h=video.videoHeight;
-  if(!frame.cropped){
-   const rect=frame.element.getBoundingClientRect(),sx=video.videoWidth/window.innerWidth,sy=video.videoHeight/window.innerHeight;
-   x=Math.max(0,Math.round(rect.left*sx));y=Math.max(0,Math.round(rect.top*sy));
-   w=Math.min(video.videoWidth-x,Math.round(rect.width*sx));h=Math.min(video.videoHeight-y,Math.round(rect.height*sy));
-  }
-  if(w<100||h<100)throw Error("Hindi makita ang flipbook frame sa captured tab.");
+  const sx=video.videoWidth/window.innerWidth,sy=video.videoHeight/window.innerHeight;
+  const x=Math.max(0,Math.round((area.left+selected.x)*sx)),y=Math.max(0,Math.round((area.top+selected.y)*sy));
+  const w=Math.min(video.videoWidth-x,Math.round(selected.w*sx)),h=Math.min(video.videoHeight-y,Math.round(selected.h*sy));
+  if(w<100||h<100){enableCrop();throw Error("Crop area is too small. Enlarge the crop frame.");}
   const canvas=document.createElement("canvas");canvas.width=w;canvas.height=h;
-  const ctx=canvas.getContext("2d",{alpha:false});if(!ctx)throw Error("Hindi mabuksan ang image canvas.");
-  ctx.drawImage(video,x,y,w,h,0,0,w,h);
+  const ctx=canvas.getContext("2d",{alpha:false});if(!ctx){enableCrop();throw Error("Hindi mabuksan ang image canvas.");}
+  ctx.drawImage(video,x,y,w,h,0,0,w,h);enableCrop();
   const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/png"));if(!blob)throw Error("Hindi nagawa ang PNG section.");
   hdCaptureSections.push(blob);
   el("captureSection").textContent="Capture section ("+hdCaptureSections.length+")";el("modalCaptureSection").textContent="Capture section ("+hdCaptureSections.length+")";
