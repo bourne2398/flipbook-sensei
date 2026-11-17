@@ -131,13 +131,16 @@ async function capturePreviewPage(){
  const button=el("capturePage");button.disabled=true;button.textContent="Piliin ang tab…";let stream;
  try{
   stream=await navigator.mediaDevices.getDisplayMedia({video:{displaySurface:"browser"},audio:false,preferCurrentTab:true});
+  const track=stream.getVideoTracks()[0],surface=track.getSettings().displaySurface;
+  if(surface!=="browser")throw Error("Buong screen ang napili. Ulitin ang capture at piliin ang Browser Tab, pagkatapos ay piliin ang tab na Flipbook Sensei. Hindi ise-save ang buong screen.");
   const video=document.createElement("video");video.srcObject=stream;video.muted=true;await video.play();
   if(!video.videoWidth)await new Promise(resolve=>video.addEventListener("loadedmetadata",resolve,{once:true}));
   await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
-  const rect=el("viewer").getBoundingClientRect(),sx=video.videoWidth/window.innerWidth,sy=video.videoHeight/window.innerHeight;
+  const rect=el("viewer").getBoundingClientRect();
+  const sx=video.videoWidth/window.innerWidth,sy=video.videoHeight/window.innerHeight;
   const x=Math.max(0,Math.round(rect.left*sx)),y=Math.max(0,Math.round(rect.top*sy));
   const width=Math.min(video.videoWidth-x,Math.round(rect.width*sx)),height=Math.min(video.videoHeight-y,Math.round(rect.height*sy));
-  if(width<100||height<100)throw Error("Hindi makita ang preview sa nakuhang tab. Piliin ang tab na may Flipbook Sensei.");
+  if(width<100||height<100)throw Error("Hindi makita ang preview. Piliin ang Browser Tab na may Flipbook Sensei.");
   const canvas=document.createElement("canvas"),scale=Math.min(1,1800/Math.max(width,height));canvas.width=Math.round(width*scale);canvas.height=Math.round(height*scale);
   canvas.getContext("2d").drawImage(video,x,y,width,height,0,0,canvas.width,canvas.height);
   const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/jpeg",.84));if(!blob)throw Error("Hindi nagawa ang screenshot.");
@@ -146,7 +149,7 @@ async function capturePreviewPage(){
   el("previewThumb").src=previewUrl;el("fileLabel").textContent=selectedFile.name;el("imagePreview").classList.add("visible");
   el("uploadStatus").textContent="Screenshot captured. Opening Google AI Mode…";await teachSelectedPage();
  }catch(error){
-  if(error.name==="NotAllowedError")setAnswer("Kinansela ang screen capture. Pindutin ulit at piliin ang kasalukuyang tab (Flipbook Sensei).","error");
+  if(error.name==="NotAllowedError")setAnswer("Kinansela ang capture. Pindutin ulit at piliin ang Browser Tab na Flipbook Sensei.","error");
   else setAnswer("Hindi makuha ang screenshot. "+(error.message||"Subukan ang manual upload."),"error");
  }finally{if(stream)stream.getTracks().forEach(track=>track.stop());button.disabled=false;button.textContent="📸 Capture page for Sensei";}
 }
