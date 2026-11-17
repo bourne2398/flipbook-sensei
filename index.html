@@ -45,25 +45,26 @@ body.modal-lock{overflow:hidden}
 
 /* Laptop-first layout: give the flipbook the space it needs at 1366×768. */
 @media (min-width: 981px) {
-  .shell { max-width: 1600px; padding: 24px 22px 36px; }
+  .shell { max-width: 1800px; padding: 20px 18px 32px; }
   .hero { margin-bottom: 20px; }
   .hero h1 { font-size: clamp(27px, 2.8vw, 38px); }
   .bookbar { margin-bottom: 14px; }
   .workspace {
-    grid-template-columns: minmax(0, 1.48fr) minmax(390px, .82fr);
+    grid-template-columns: minmax(0, 1.9fr) minmax(320px, .72fr);
     gap: 16px;
     align-items: start;
   }
   .viewer {
-    height: clamp(480px, calc(100vh - 285px), 720px);
-    min-height: 480px;
+    height: clamp(560px, calc(100vh - 220px), 900px);
+    min-height: 560px;
   }
   .teacher { min-height: 0; }
   .teacherbody { padding: 16px; gap: 12px; }
   .answer { min-height: 190px; max-height: 360px; }
 }
 @media (min-width: 981px) and (max-width: 1180px) {
-  .workspace { grid-template-columns: minmax(0, 1.25fr) minmax(350px, .9fr); }
+  .workspace { grid-template-columns: minmax(0, 1.45fr) minmax(300px, .85fr); }
+  .viewer { height: clamp(520px, calc(100vh - 220px), 820px); min-height: 520px; }
   .panelhead { padding-inline: 14px; }
 }
 @media (min-width: 981px) and (max-height: 800px) {
@@ -73,7 +74,7 @@ body.modal-lock{overflow:hidden}
   .hero p { font-size: 12px; }
   .bookbar { padding: 8px; margin-bottom: 12px; }
   .field { padding-top: 10px; padding-bottom: 10px; }
-  .viewer { height: clamp(470px, calc(100vh - 255px), 620px); }
+  .viewer { height: clamp(540px, calc(100vh - 205px), 760px); min-height: 540px; }
   .teacherbody { gap: 10px; padding: 14px; }
   .notice { padding: 9px 11px; }
   .question { min-height: 72px; }
@@ -88,7 +89,6 @@ body.modal-lock{overflow:hidden}
 <section class="workspace">
 <article class="panel"><div class="panelhead"><div class="paneltitle">📖 Lesson preview</div><div style="display:flex;align-items:center;gap:10px"><span class="panelmeta" id="bookStatus">Ready to open</span><button class="btn btn-quiet" id="maximizePreview" type="button" title="Open full-screen preview">⛶ Maximize</button></div></div><div class="viewer" id="viewer"><div class="empty"><div><div class="emptyicon">▤</div><strong>Your lesson starts here</strong>Open a FlipHTML5 link above to begin reading.</div></div></div><div class="readerbar"><label for="pageNumber">Page</label><input id="pageNumber" class="field pagefield" type="number" min="1" max="99999" value="1"><button class="btn btn-secondary" id="goPage" type="button">Go</button><button class="btn capture-btn" id="capturePage" type="button">🔍 Start HD capture</button><button class="btn btn-secondary" id="captureSection" type="button" hidden>Capture section (0)</button><button class="btn btn-secondary" id="finishCapture" type="button" hidden>Finish &amp; combine</button><span class="spacer"></span><button class="btn btn-quiet" id="copyBook" type="button">Copy link</button></div></article>
 <article class="panel teacher"><div class="panelhead"><div class="paneltitle">✦ Your AI teacher</div><span class="panelmeta">Vision-enabled lesson guide</span></div><div class="teacherbody">
-<div class="teacherprofile"><div class="avatar">先</div><div><strong>Sensei is ready to teach</strong><small>Google AI Mode · Screenshot-based teaching</small></div></div>
 <div class="notice">Gamitin ang HD multi-section capture: i-zoom ang pahina gamit ang FlipHTML5 + control, kumuha ng 2–4 sections habang nag-i-scroll, at pagsamahin ang mga ito bilang isang malinaw na PNG. Pagkatapos, ipadala ito sa Google AI Mode.</div>
 <div class="uploadbox"><div class="uploadcopy"><strong>📷 Add a page screenshot</strong><small>PNG, JPG, or WEBP · attach it to Google AI Mode</small></div><input id="pageImage" type="file" accept="image/png,image/jpeg,image/webp"></div>
 <div class="imagepreview" id="imagePreview"><img id="previewThumb" alt="Selected lesson page"><span id="fileLabel">Screenshot selected</span><button id="removeImage" class="btn btn-quiet" type="button">Remove</button></div>
