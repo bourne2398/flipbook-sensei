@@ -1,6 +1,9 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
+  "rewrites": [
+    { "source": "/", "destination": "/index.html" }
+  ],
   "functions": {
     "api/teach.js": {
       "maxDuration": 60
