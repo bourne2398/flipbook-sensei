@@ -86,10 +86,10 @@ body.modal-lock{overflow:hidden}
 <section class="hero"><div><div class="eyebrow">Read · Understand · Practice</div><h1>A better way to learn every page.</h1><p>Open your flipbook, capture a page, then send the screenshot to Google AI Mode for a Tagalog teacher script.</p></div><div class="hero-note">Your flipbook stays open beside your lesson, so you can read and learn at the same time.</div></section>
 <form class="bookbar" id="bookForm"><input id="bookUrl" class="field bookurl" type="url" placeholder="Paste your FlipHTML5 link" value="https://online.fliphtml5.com/Sibayan_Sensei/Day-1-Kaigo/#p=1" required><button class="btn btn-primary" type="submit">Open flipbook ↗</button></form>
 <section class="workspace">
-<article class="panel"><div class="panelhead"><div class="paneltitle">📖 Lesson preview</div><div style="display:flex;align-items:center;gap:10px"><span class="panelmeta" id="bookStatus">Ready to open</span><button class="btn btn-quiet" id="maximizePreview" type="button" title="Open full-screen preview">⛶ Maximize</button></div></div><div class="viewer" id="viewer"><div class="empty"><div><div class="emptyicon">▤</div><strong>Your lesson starts here</strong>Open a FlipHTML5 link above to begin reading.</div></div></div><div class="readerbar"><label for="pageNumber">Page</label><input id="pageNumber" class="field pagefield" type="number" min="1" max="99999" value="1"><button class="btn btn-secondary" id="goPage" type="button">Go</button><button class="btn capture-btn" id="capturePage" type="button">📸 Capture page for Sensei</button><span class="spacer"></span><button class="btn btn-quiet" id="copyBook" type="button">Copy link</button></div></article>
+<article class="panel"><div class="panelhead"><div class="paneltitle">📖 Lesson preview</div><div style="display:flex;align-items:center;gap:10px"><span class="panelmeta" id="bookStatus">Ready to open</span><button class="btn btn-quiet" id="maximizePreview" type="button" title="Open full-screen preview">⛶ Maximize</button></div></div><div class="viewer" id="viewer"><div class="empty"><div><div class="emptyicon">▤</div><strong>Your lesson starts here</strong>Open a FlipHTML5 link above to begin reading.</div></div></div><div class="readerbar"><label for="pageNumber">Page</label><input id="pageNumber" class="field pagefield" type="number" min="1" max="99999" value="1"><button class="btn btn-secondary" id="goPage" type="button">Go</button><button class="btn capture-btn" id="capturePage" type="button">🔍 Start HD capture</button><button class="btn btn-secondary" id="captureSection" type="button" hidden>Capture section (0)</button><button class="btn btn-secondary" id="finishCapture" type="button" hidden>Finish &amp; combine</button><span class="spacer"></span><button class="btn btn-quiet" id="copyBook" type="button">Copy link</button></div></article>
 <article class="panel teacher"><div class="panelhead"><div class="paneltitle">✦ Your AI teacher</div><span class="panelmeta">Vision-enabled lesson guide</span></div><div class="teacherbody">
 <div class="teacherprofile"><div class="avatar">先</div><div><strong>Sensei is ready to teach</strong><small>Google AI Mode · Screenshot-based teaching</small></div></div>
-<div class="notice">I-capture ang pahina, i-download ang screenshot, at buksan ang Google AI Mode. Ikabit ang screenshot sa Google at i-paste ang nakahandang prompt. Hindi kailangan ng API key.</div>
+<div class="notice">Gamitin ang HD multi-section capture: i-zoom ang pahina gamit ang FlipHTML5 + control, kumuha ng 2–4 sections habang nag-i-scroll, at pagsamahin ang mga ito bilang isang malinaw na PNG. Pagkatapos, ipadala ito sa Google AI Mode.</div>
 <div class="uploadbox"><div class="uploadcopy"><strong>📷 Add a page screenshot</strong><small>PNG, JPG, or WEBP · attach it to Google AI Mode</small></div><input id="pageImage" type="file" accept="image/png,image/jpeg,image/webp"></div>
 <div class="imagepreview" id="imagePreview"><img id="previewThumb" alt="Selected lesson page"><span id="fileLabel">Screenshot selected</span><button id="removeImage" class="btn btn-quiet" type="button">Remove</button></div>
 <textarea id="question" class="field question" placeholder="May gusto ka bang bigyang-diin? Halimbawa: Ipaliwanag nang mas detalyado ang grammar at magbigay ng dagdag na halimbawa."></textarea>
@@ -110,7 +110,7 @@ el("openGoogleAI").addEventListener("click",()=>openModal("googleModal"));
 function buildTeacherPrompt(){
  const page=Number(el("pageNumber").value)||1;
  const extra=el("question").value.trim();
- return "Act as an expert, patient Japanese-language teacher teaching Filipino students. Carefully inspect the attached flipbook screenshot (page "+page+"). Treat the image as the source of truth; do not invent unreadable content. Create a complete, natural Filipino/Tagalog teacher script that I can read aloud in class.\n\nInclude: (1) lesson title and objectives, (2) a ready-to-speak teacher script with natural transitions, (3) all visible Japanese vocabulary with kanji/kana, kana reading, romaji, and Tagalog meaning, (4) grammar explanations in simple Tagalog, (5) Japanese example sentences with readings and Tagalog translations, (6) questions to ask students, (7) recap, (8) student practice exercises, (9) a True or False quiz written entirely in English with clear statements based on the lesson, and (10) a complete answer key in a separate final section at the very end of the script. The True or False quiz must contain 10 statements (unless the screenshot has too little information, in which case create as many accurate statements as possible). Do not show answers beside the questions. Put all True/False answers together in the final answer-key section after the entire teacher script, exercises, and quiz, with brief explanations for each answer. Preserve Japanese spelling accurately. Explain every important item visible in the screenshot. If text is unclear, identify it instead of guessing.\n\nAdditional teacher request: "+(extra||"Explain the entire page clearly and thoroughly for a beginner class.")+"\n\nWrite in natural spoken Tagalog, not English. Make the script detailed, classroom-ready, and easy to deliver aloud.";
+ return "Act as an expert, patient Japanese-language teacher teaching Filipino students. Carefully inspect the attached flipbook screenshot (page "+page+"). If the image is a tall composite, it contains zoomed-in page sections arranged from top to bottom in reading order; inspect each section carefully and combine the information without repeating content. Treat the image as the source of truth; do not invent unreadable content. Create a complete, natural Filipino/Tagalog teacher script that I can read aloud in class.\n\nInclude: (1) lesson title and objectives, (2) a ready-to-speak teacher script with natural transitions, (3) all visible Japanese vocabulary with kanji/kana, kana reading, romaji, and Tagalog meaning, (4) grammar explanations in simple Tagalog, (5) Japanese example sentences with readings and Tagalog translations, (6) questions to ask students, (7) recap, (8) student practice exercises, (9) a True or False quiz written entirely in English with clear statements based on the lesson, and (10) a complete answer key in a separate final section at the very end of the script. The True or False quiz must contain 10 statements (unless the screenshot has too little information, in which case create as many accurate statements as possible). Do not show answers beside the questions. Put all True/False answers together in the final answer-key section after the entire teacher script, exercises, and quiz, with brief explanations for each answer. Preserve Japanese spelling accurately. Explain every important item visible in the screenshot. If text is unclear, identify it instead of guessing.\n\nAdditional teacher request: "+(extra||"Explain the entire page clearly and thoroughly for a beginner class.")+"\n\nWrite in natural spoken Tagalog, not English. Make the script detailed, classroom-ready, and easy to deliver aloud.";
 }
 async function copyTeacherPrompt(){
  if(!lastPrompt)lastPrompt=buildTeacherPrompt();
@@ -200,60 +200,93 @@ async function teachSelectedPage(){
 }
 el("teachButton").addEventListener("click",teachSelectedPage);
 el("copyScript").addEventListener("click",copyTeacherPrompt);
-async function capturePreviewPage(){
+let hdCaptureStream=null,hdCaptureVideo=null,hdCaptureFrame=null,hdCaptureSections=[];
+function stopHDCapture(){
+ if(hdCaptureStream)hdCaptureStream.getTracks().forEach(track=>track.stop());
+ hdCaptureStream=null;hdCaptureVideo=null;hdCaptureFrame=null;
+ el("captureSection").hidden=true;el("finishCapture").hidden=true;
+ el("capturePage").disabled=false;el("capturePage").textContent="🔍 Start HD capture";
+}
+async function startHDCapture(){
  const frame=el("viewer").querySelector("iframe");
  if(!frame){setAnswer("Buksan muna ang flipbook bago mag-capture.","error");return;}
- if(!navigator.mediaDevices?.getDisplayMedia){setAnswer("Hindi suportado ng browser ang automatic screenshot. Gamitin ang manual screenshot upload sa ibaba.","error");return;}
- const button=el("capturePage");button.disabled=true;button.textContent="Piliin ang tab…";let stream;
+ if(!navigator.mediaDevices?.getDisplayMedia){setAnswer("Hindi suportado ng browser ang tab capture. Gamitin ang manual screenshot upload.","error");return;}
+ const button=el("capturePage");button.disabled=true;button.textContent="Piliin ang tab…";
  try{
-  stream=await navigator.mediaDevices.getDisplayMedia({video:{displaySurface:"browser"},audio:false,preferCurrentTab:true});
-  const track=stream.getVideoTracks()[0],surface=track.getSettings().displaySurface;
-  if(surface!=="browser")throw Error("Buong screen ang napili. Ulitin ang capture at piliin ang Browser Tab na may Flipbook Sensei.");
-  // Ask the browser for the highest practical tab-capture resolution. Browsers may
-  // ignore this request, so the actual captured dimensions are checked below.
-  try{await track.applyConstraints({width:{ideal:3840},height:{ideal:2160},frameRate:{ideal:30}});}catch(constraintError){console.warn("High-resolution capture constraints were not accepted; keeping native capture size.",constraintError);}
-  let regionCropped=false;
-  if(window.CropTarget && typeof track.cropTo==="function"){
-   try{
-    const target=await window.CropTarget.fromElement(frame);
-    await track.cropTo(target);
-    regionCropped=true;
-   }catch(cropError){console.warn("Region capture unavailable; using precise iframe crop.",cropError);}
+  hdCaptureStream=await navigator.mediaDevices.getDisplayMedia({video:{displaySurface:"browser"},audio:false,preferCurrentTab:true});
+  const track=hdCaptureStream.getVideoTracks()[0];
+  if(track.getSettings().displaySurface!=="browser")throw Error("Piliin ang Browser Tab na may Flipbook Sensei, hindi buong screen.");
+  try{await track.applyConstraints({width:{ideal:3840},height:{ideal:2160},frameRate:{ideal:30}});}catch(e){console.warn("Native capture resolution retained.",e);}
+  let cropped=false;
+  if(window.CropTarget&&typeof track.cropTo==="function"){
+   try{await track.cropTo(await window.CropTarget.fromElement(frame));cropped=true;}catch(e){console.warn("Element crop unavailable; using iframe bounds.",e);}
   }
-  const video=document.createElement("video");video.srcObject=stream;video.muted=true;video.playsInline=true;await video.play();
-  if(!video.videoWidth)await new Promise(resolve=>video.addEventListener("loadedmetadata",resolve,{once:true}));
+  hdCaptureVideo=document.createElement("video");hdCaptureVideo.srcObject=hdCaptureStream;hdCaptureVideo.muted=true;hdCaptureVideo.playsInline=true;await hdCaptureVideo.play();
+  if(!hdCaptureVideo.videoWidth)await new Promise(resolve=>hdCaptureVideo.addEventListener("loadedmetadata",resolve,{once:true}));
+  hdCaptureFrame={element:frame,cropped};
+  hdCaptureSections=[];
+  button.disabled=false;button.textContent="Capture mode active";
+  el("captureSection").hidden=false;el("finishCapture").hidden=false;
+  el("captureSection").textContent="Capture section (0)";
+  el("uploadStatus").textContent="HD mode ready. Zoom in using FlipHTML5's own + control, then capture each visible section.";
+  setAnswer("HD multi-section capture is active. 1) Use the FlipHTML5 zoom (+) control inside the preview. 2) Capture the visible top section. 3) Scroll or pan inside the flipbook to the next section and capture again. 4) Click Finish & combine. Aim for 2–4 sections; keep the zoom level the same.");
+ }catch(error){
+  stopHDCapture();
+  if(error.name==="NotAllowedError")setAnswer("Kinansela ang tab capture. Payagan ang Browser Tab capture.","error");
+  else setAnswer("Hindi masimulan ang HD capture. "+(error.message||"Subukan muli."),"error");
+ }
+}
+async function captureHDSection(){
+ if(!hdCaptureVideo||!hdCaptureFrame)return;
+ try{
+  const video=hdCaptureVideo,frame=hdCaptureFrame;
   await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
-  let sx=1,sy=1,x=0,y=0,width=video.videoWidth,height=video.videoHeight;
-  if(!regionCropped){
-   const rect=frame.getBoundingClientRect();
-   sx=video.videoWidth/window.innerWidth;sy=video.videoHeight/window.innerHeight;
+  let x=0,y=0,w=video.videoWidth,h=video.videoHeight;
+  if(!frame.cropped){
+   const rect=frame.element.getBoundingClientRect(),sx=video.videoWidth/window.innerWidth,sy=video.videoHeight/window.innerHeight;
    x=Math.max(0,Math.round(rect.left*sx));y=Math.max(0,Math.round(rect.top*sy));
-   width=Math.min(video.videoWidth-x,Math.round(rect.width*sx));
-   height=Math.min(video.videoHeight-y,Math.round(rect.height*sy));
+   w=Math.min(video.videoWidth-x,Math.round(rect.width*sx));h=Math.min(video.videoHeight-y,Math.round(rect.height*sy));
   }
-  if(width<100||height<100)throw Error("Hindi makita ang flipbook frame. Piliin ang Browser Tab na may Flipbook Sensei at subukan muli.");
-  // Preserve every native capture pixel: do not shrink the screenshot to an
-  // arbitrary 2200px limit. PNG avoids JPEG blur around Japanese characters.
-  const canvas=document.createElement("canvas");
-  canvas.width=Math.round(width);canvas.height=Math.round(height);
-  const context=canvas.getContext("2d",{alpha:false});
-  if(!context)throw Error("Hindi mabuksan ang high-resolution canvas.");
-  context.imageSmoothingEnabled=false;
-  context.drawImage(video,x,y,width,height,0,0,canvas.width,canvas.height);
-  const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/png"));if(!blob)throw Error("Hindi nagawa ang screenshot.");
+  if(w<100||h<100)throw Error("Hindi makita ang flipbook frame sa captured tab.");
+  const canvas=document.createElement("canvas");canvas.width=w;canvas.height=h;
+  const ctx=canvas.getContext("2d",{alpha:false});if(!ctx)throw Error("Hindi mabuksan ang image canvas.");
+  ctx.drawImage(video,x,y,w,h,0,0,w,h);
+  const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/png"));if(!blob)throw Error("Hindi nagawa ang PNG section.");
+  hdCaptureSections.push(blob);
+  el("captureSection").textContent="Capture section ("+hdCaptureSections.length+")";
+  el("finishCapture").disabled=hdCaptureSections.length<1;
+  el("uploadStatus").textContent="Captured section "+hdCaptureSections.length+" · "+w+" × "+h+" px";
+ }catch(error){setAnswer("Hindi makuha ang section. "+(error.message||""),"error");}
+}
+async function finishHDCapture(){
+ if(!hdCaptureSections.length){setAnswer("Capture at least one section first.","error");return;}
+ const button=el("finishCapture");button.disabled=true;button.textContent="Combining…";
+ try{
+  const bitmaps=await Promise.all(hdCaptureSections.map(blob=>createImageBitmap(blob)));
+  const width=Math.max(...bitmaps.map(b=>b.width));
+  const height=bitmaps.reduce((sum,b)=>sum+b.height,0);
+  if(width*height>100000000)throw Error("The combined image is too large. Finish with 2–3 sections instead.");
+  const canvas=document.createElement("canvas");canvas.width=width;canvas.height=height;
+  const ctx=canvas.getContext("2d",{alpha:false});if(!ctx)throw Error("Could not create the combined image.");
+  ctx.fillStyle="#fff";ctx.fillRect(0,0,width,height);
+  let y=0;
+  for(const bitmap of bitmaps){ctx.drawImage(bitmap,0,y);y+=bitmap.height;bitmap.close?.();}
+  const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/png"));if(!blob)throw Error("Could not export the combined PNG.");
   selectedPngBlob=blob;
-  selectedFile=new File([blob],"flipbook-page-"+(Number(el("pageNumber").value)||1)+"-"+canvas.width+"x"+canvas.height+".png",{type:"image/png"});
+  selectedFile=new File([blob],"flipbook-hd-sections-"+(Number(el("pageNumber").value)||1)+"-"+width+"x"+height+".png",{type:"image/png"});
   if(previewUrl)URL.revokeObjectURL(previewUrl);previewUrl=URL.createObjectURL(selectedFile);
   el("previewThumb").src=previewUrl;el("fileLabel").textContent=selectedFile.name;el("imagePreview").classList.add("visible");
-  el("uploadStatus").textContent="HD capture: "+canvas.width+" × "+canvas.height+" px (native tab resolution). Ready for Google AI Mode.";
-  el("googleHandoffStatus").textContent="Screenshot captured at "+canvas.width+" × "+canvas.height+" pixels. The image is saved as lossless PNG; actual 4K detail depends on your display and browser tab capture resolution.";
+  el("uploadStatus").textContent="HD composite ready · "+width+" × "+height+" px · "+hdCaptureSections.length+" sections";
+  lastPrompt=buildTeacherPrompt();
+  stopHDCapture();
   await teachSelectedPage();
- }catch(error){
-  if(error.name==="NotAllowedError")setAnswer("Kinansela ang screen sharing. Payagan ang Browser Tab capture para makuha ang flipbook lamang.","error");
-  else setAnswer("Hindi makuha ang flipbook screenshot. "+(error.message||"Subukan ang manual upload."),"error");
- }finally{if(stream)stream.getTracks().forEach(track=>track.stop());button.disabled=false;button.textContent="📸 Capture page for Sensei";}
+  el("googleHandoffStatus").textContent="Your zoomed HD screenshot is a lossless PNG made from "+bitmaps.length+" captured sections, arranged top-to-bottom. Copy image + prompt, then paste into Google AI Mode.";
+ }catch(error){button.disabled=false;button.textContent="Retry combine";setAnswer("Hindi ma-combine ang sections. "+(error.message||""),"error");}
 }
-el("capturePage").addEventListener("click",capturePreviewPage);
+el("capturePage").addEventListener("click",startHDCapture);
+el("captureSection").addEventListener("click",captureHDSection);
+el("finishCapture").addEventListener("click",finishHDCapture);
+
 showBook();
 </script>
 </body>
