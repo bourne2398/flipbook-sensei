@@ -41,7 +41,7 @@ class handler(BaseHTTPRequestHandler):
             page = max(1, min(int(payload.get("page", 1)), 99999))
             book_url = str(payload.get("book_url", "")).strip()
 
-            match = re.fullmatch(r"data:(image/(?:png|jpeg|webp));base64,([A-Za-z0-9+/=\\r\\n]+)", image)
+            match = re.fullmatch(r"data:(image/(?:png|jpeg|webp));base64,([A-Za-z0-9+/=\r\n]+)", image)
             if not match:
                 return send_json(self, 400, {"error": "Upload a PNG, JPG, or WEBP screenshot."})
             mime_type, encoded = match.groups()
@@ -62,9 +62,9 @@ class handler(BaseHTTPRequestHandler):
                 "3) Important vocabulary or terms, 4) Examples (label any examples you create), "
                 "5) Quick recap, 6) Three short check-your-understanding questions with answers hidden "
                 "at the end under 'Answer key'. If the page is Japanese, preserve Japanese writing and "
-                "include readings/romaji and meanings when legible. Keep the lesson engaging and not overly verbose.\\n\\n"
-                f"Book URL (context only): {book_url or 'not provided'}\\n"
-                f"Page number: {page}\\n"
+                "include readings/romaji and meanings when legible. Keep the lesson engaging and not overly verbose.\n\n"
+                f"Book URL (context only): {book_url or 'not provided'}\n"
+                f"Page number: {page}\n"
                 f"Learner request: {question or 'Please teach me everything important on this page.'}"
             )
             body = {
