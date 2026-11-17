@@ -105,7 +105,7 @@ button,input,textarea{font:inherit}button{cursor:pointer}.topbar{height:76px;bor
 <script>
 const el=id=>document.getElementById(id);
 const GOOGLE_AI_URL="https://www.google.com/ai";
-let previewPlaceholder=null;
+let previewPlaceholder=null,captureCompositeUrl=null;
 function openModal(id){el(id).classList.add("open");document.body.classList.add("modal-lock");}
 function closeModal(id){el(id).classList.remove("open");if(id==="googleModal")el(id).classList.remove("reading-mode");if(id==="previewModal"){if(previewPlaceholder?.parentNode){previewPlaceholder.parentNode.insertBefore(el("viewer").querySelector("iframe")||el("largeViewer").querySelector("iframe"),previewPlaceholder);previewPlaceholder.remove();previewPlaceholder=null;}if(document.fullscreenElement===el("previewModal"))document.exitFullscreen?.().catch(()=>{});}if(!document.querySelector(".modal.open"))document.body.classList.remove("modal-lock");}
 el("openGoogleAI").addEventListener("click",()=>openModal("googleModal"));
@@ -262,9 +262,9 @@ async function captureHDSection(){
 }
 
 function showCaptureReview(blob,width,height,count){
- if(previewUrl)URL.revokeObjectURL(previewUrl);
- previewUrl=URL.createObjectURL(blob);
- el("captureCompositePreview").src=previewUrl;
+ if(captureCompositeUrl)URL.revokeObjectURL(captureCompositeUrl);
+ captureCompositeUrl=URL.createObjectURL(blob);
+ el("captureCompositePreview").src=captureCompositeUrl;
  el("captureReviewInfo").textContent="Combined image · "+count+" captured sections · "+width+" × "+height+" pixels · PNG. Scroll down to inspect the complete image.";
  const strip=el("captureSectionStrip");strip.replaceChildren();
  hdCaptureSections.forEach((section,index)=>{
@@ -311,6 +311,8 @@ async function finishHDCapture(){
   lastPrompt=buildTeacherPrompt();
   const sectionCount=hdCaptureSections.length;
   stopHDCapture();
+  if(document.fullscreenElement===el("previewModal")){try{await document.exitFullscreen();}catch(e){console.warn("Could not exit fullscreen before review.",e);}}
+  if(el("previewModal").classList.contains("open"))closeModal("previewModal");
   showCaptureReview(blob,width,height,sectionCount);
   setAnswer("Your HD capture is ready to review. Scroll through the combined image, then copy it and paste it into Google AI Mode. Copy the teacher prompt separately.");
  }catch(error){button.disabled=false;button.textContent="Retry combine";setAnswer("Hindi ma-combine ang sections. "+(error.message||""),"error");}
