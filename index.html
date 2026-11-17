@@ -18,6 +18,16 @@ button,input,textarea{font:inherit}button{cursor:pointer}.topbar{height:76px;bor
 .modalframe{flex:1;min-height:0;width:100%;border:1px solid var(--line);border-radius:12px;background:#fff}
 .modalclose{width:40px;height:40px;border:1px solid #42536d;border-radius:10px;background:#1b2940;color:#fff;font-size:23px;line-height:1}
 .modalopen{background:#263752;color:#e7effa;border:1px solid #3a4e6a;border-radius:9px;padding:8px 12px;font-weight:700}
+.script-workspace{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:14px;padding:8px 12px 16px}
+.script-help{color:#c6d3e4;background:#17263a;border:1px solid #30435e;border-radius:10px;padding:13px 15px;font-size:13px;line-height:1.55}
+.paste-script-panel,.teacher-script-panel{display:flex;flex-direction:column;gap:10px;min-height:0}
+.paste-script-panel label{font-size:13px;font-weight:800;color:var(--text)}
+.script-input{width:100%;min-height:220px;resize:vertical;background:#101b2b;color:#f1f5fb;border:1px solid #354964;border-radius:10px;padding:14px;font:13px/1.6 inherit}
+.script-actions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.teacher-script-output{white-space:pre-wrap;overflow-wrap:anywhere;color:#172033;background:#fff;border-radius:12px;padding:22px;min-height:260px;max-height:none;overflow:visible;font:14px/1.75 Arial,sans-serif}
+[hidden]{display:none!important}
+@media(max-width:560px){.script-workspace{padding:5px 4px 12px}.script-actions>*{flex:1}.teacher-script-output{padding:14px;font-size:13px}}
+
 #previewModal .modalframe{background:#080e18}
 body.modal-lock{overflow:hidden}
 @media(max-width:560px){.modal{padding:6px}.modalbar{height:48px}}
@@ -80,14 +90,14 @@ body.modal-lock{overflow:hidden}
 </section>
 <div class="footer">Flipbook Sensei · Google AI Mode workflow · No API key required</div>
 </main>
-<div class="modal" id="googleModal" role="dialog" aria-modal="true" aria-label="Google AI Mode"><div class="modalbar"><span>Google AI Mode · Attach screenshot + paste prompt</span><div class="modalbar-actions"><button class="modalopen" id="downloadShot" type="button">Download screenshot ↓</button><button class="modalopen" id="copyPromptModal" type="button">Copy teacher prompt</button><button class="modalopen" id="openGoogleExternal" type="button">Open in new tab ↗</button><button class="modalclose" type="button" data-close="googleModal" aria-label="Close">×</button></div></div><div style="padding:10px 14px;color:#b7c8dc;font-size:12px">1. Download the screenshot. 2. Attach it using Google AI Mode’s image button. 3. Paste the copied prompt into Google AI Mode and send.</div><iframe class="modalframe" id="googleFrame" title="Google AI Mode" src="about:blank" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+<div class="modal" id="googleModal" role="dialog" aria-modal="true" aria-label="Teacher lesson script"><div class="modalbar"><span>✦ Teacher Lesson Script</span><div class="modalbar-actions"><button class="modalopen" id="downloadShot" type="button">Download screenshot ↓</button><button class="modalopen" id="copyPromptModal" type="button">Copy teacher prompt</button><button class="modalopen" id="openGoogleExternal" type="button">Open Google AI ↗</button><button class="modalclose" type="button" data-close="googleModal" aria-label="Close">×</button></div></div><div class="script-workspace"><div class="script-help">Google AI opens in a separate tab. Attach the downloaded flipbook screenshot and send the copied prompt. Return to this tab and paste Google's generated teacher script below. This modal will remain open when you return.</div><section id="pasteScriptPanel" class="paste-script-panel"><label for="googleAnswerInput">Paste Google's generated teacher script</label><textarea id="googleAnswerInput" class="field script-input" placeholder="Paste the complete Tagalog teacher script here…"></textarea><div class="script-actions"><button class="btn btn-primary" id="displayGoogleAnswer" type="button">Display teacher script</button></div></section><section id="teacherScriptPanel" class="teacher-script-panel" hidden><div class="script-actions"><button class="btn btn-secondary" id="editGoogleAnswer" type="button">Paste another answer</button><button class="btn btn-secondary" id="copyGoogleAnswer" type="button">Copy script</button><button class="btn btn-secondary" id="downloadGoogleAnswer" type="button">Download script</button></div><pre id="teacherScriptOutput" class="teacher-script-output"></pre></section></div></div>
 <div class="modal" id="previewModal" role="dialog" aria-modal="true" aria-label="Full-screen flipbook preview"><div class="modalbar"><span>Flipbook preview</span><button class="modalclose" type="button" data-close="previewModal" aria-label="Close">×</button></div><div class="modalframe" id="largeViewer"></div></div>
 <script>
 const el=id=>document.getElementById(id);
 const GOOGLE_AI_URL="https://www.google.com/ai";
 function openModal(id){el(id).classList.add("open");document.body.classList.add("modal-lock");}
 function closeModal(id){el(id).classList.remove("open");if(!document.querySelector(".modal.open"))document.body.classList.remove("modal-lock");}
-el("openGoogleAI").addEventListener("click",()=>{if(el("googleFrame").src==="about:blank")el("googleFrame").src=GOOGLE_AI_URL;openModal("googleModal");});
+el("openGoogleAI").addEventListener("click",()=>openModal("googleModal"));
 function buildTeacherPrompt(){
  const page=Number(el("pageNumber").value)||1;
  const extra=el("question").value.trim();
@@ -101,6 +111,23 @@ async function copyTeacherPrompt(){
 el("copyPromptModal").addEventListener("click",copyTeacherPrompt);
 el("downloadShot").addEventListener("click",()=>{if(!selectedFile){el("uploadStatus").textContent="Capture or select a screenshot first.";return;}const a=document.createElement("a");a.href=URL.createObjectURL(selectedFile);a.download=selectedFile.name||"flipbook-page.jpg";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000);});
 el("openGoogleExternal").addEventListener("click",()=>window.open(GOOGLE_AI_URL,"_blank","noopener,noreferrer"));
+el("displayGoogleAnswer").addEventListener("click",()=>{
+ const answer=el("googleAnswerInput").value.trim();
+ if(!answer){el("googleAnswerInput").focus();return;}
+ el("teacherScriptOutput").textContent=answer;
+ el("pasteScriptPanel").hidden=true;el("teacherScriptPanel").hidden=false;
+});
+el("editGoogleAnswer").addEventListener("click",()=>{el("pasteScriptPanel").hidden=false;el("teacherScriptPanel").hidden=true;el("googleAnswerInput").focus();});
+el("copyGoogleAnswer").addEventListener("click",async()=>{
+ const answer=el("teacherScriptOutput").textContent;
+ try{await navigator.clipboard.writeText(answer);el("copyGoogleAnswer").textContent="Copied ✓";setTimeout(()=>el("copyGoogleAnswer").textContent="Copy script",1500);}
+ catch{el("googleAnswerInput").value=answer;el("pasteScriptPanel").hidden=false;el("teacherScriptPanel").hidden=true;el("googleAnswerInput").focus();}
+});
+el("downloadGoogleAnswer").addEventListener("click",()=>{
+ const answer=el("teacherScriptOutput").textContent;if(!answer)return;
+ const blob=new Blob([answer],{type:"text/plain;charset=utf-8"}),url=URL.createObjectURL(blob),a=document.createElement("a");
+ a.href=url;a.download="flipbook-sensei-teacher-script.txt";a.click();setTimeout(()=>URL.revokeObjectURL(url),1500);
+});
 document.querySelectorAll("[data-close]").forEach(button=>button.addEventListener("click",()=>closeModal(button.dataset.close)));
 document.querySelectorAll(".modal").forEach(modal=>modal.addEventListener("click",event=>{if(event.target===modal)closeModal(modal.id);}));
 document.addEventListener("keydown",event=>{if(event.key==="Escape")document.querySelectorAll(".modal.open").forEach(modal=>closeModal(modal.id));});
@@ -120,8 +147,9 @@ function setAnswer(message,kind=""){el("answer").className="answer"+(kind?" "+ki
 async function teachSelectedPage(){
  if(!selectedFile){setAnswer("Walang screenshot. Pumili muna ng screenshot o gamitin ang Capture page for Sensei.","error");return;}
  lastPrompt=buildTeacherPrompt();
- setAnswer("Handa na ang screenshot at teacher prompt. Sa Google AI Mode modal, i-download ang screenshot, i-attach ito sa Google, at i-paste ang prompt. Google AI mismo ang gagawa ng lesson script.");
- if(el("googleFrame").src==="about:blank")el("googleFrame").src=GOOGLE_AI_URL;
+ setAnswer("Handa na ang screenshot at teacher prompt. Buksan ang Google AI sa hiwalay na tab, pagkatapos ay bumalik dito at i-paste ang generated teacher script.");
+ el("googleAnswerInput").value="";
+ el("pasteScriptPanel").hidden=false;el("teacherScriptPanel").hidden=true;
  openModal("googleModal");
 }
 el("teachButton").addEventListener("click",teachSelectedPage);
