@@ -1,5 +1,6 @@
 const MAX_IMAGE_BYTES = 3 * 1024 * 1024;
 const ALLOWED_MIME = new Set(["image/jpeg", "image/png", "image/webp"]);
+const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
 
 function send(res, status, payload) {
   res.status(status).setHeader("Content-Type", "application/json; charset=utf-8");
@@ -32,9 +33,11 @@ export default async function handler(req, res) {
       return send(res, 413, { error: "The optimized screenshot must be 3 MB or smaller." });
     }
 
-    const apiKey = process.env.OPENAI_API_KEY;
+    const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      return send(res, 500, { error: "The server is missing OPENAI_API_KEY. Add it to the Vercel project's Environment Variables." });
+      return send(res, 500, {
+        error: "Google AI is not connected yet. Add GEMINI_API_KEY in Vercel → Project Settings → Environment Variables, then redeploy."
+      });
     }
 
     const page = Math.max(1, Math.min(99999, Number.parseInt(body.page, 10) || 1));
@@ -59,23 +62,20 @@ export default async function handler(req, res) {
     const timeout = setTimeout(() => controller.abort(), 55000);
     let upstream;
     try {
-      upstream = await fetch("https://api.openai.com/v1/chat/completions", {
+      const endpoint = "https://generativelanguage.googleapis.com/v1beta/models/" +
+        encodeURIComponent(GEMINI_MODEL) + ":generateContent?key=" + encodeURIComponent(apiKey);
+      upstream = await fetch(endpoint, {
         method: "POST",
-        headers: {
-          Authorization: "Bearer " + apiKey,
-          "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: process.env.OPENAI_MODEL || "gpt-4.1-mini",
-          temperature: 0.35,
-          max_tokens: 3200,
-          messages: [{
+          contents: [{
             role: "user",
-            content: [
-              { type: "text", text: prompt },
-              { type: "image_url", image_url: { url: "data:" + mime + ";base64," + encoded, detail: "high" } }
+            parts: [
+              { text: prompt },
+              { inline_data: { mime_type: mime, data: encoded } }
             ]
-          }]
+          }],
+          generationConfig: { temperature: 0.35, maxOutputTokens: 4096 }
         }),
         signal: controller.signal
       });
@@ -85,18 +85,30 @@ export default async function handler(req, res) {
 
     const result = await upstream.json().catch(() => ({}));
     if (!upstream.ok) {
-      const detail = result?.error?.message || "The AI provider rejected the request.";
-      return send(res, 502, { error: "AI service error: " + String(detail).slice(0, 600) });
+      const detail = result?.error?.message || "Google AI rejected the request.";
+      return send(res, upstream.status === 429 ? 429 : 502, {
+        error: "Google AI error: " + String(detail).slice(0, 600)
+      });
     }
 
-    const explanation = result?.choices?.[0]?.message?.content;
-    if (typeof explanation !== "string" || !explanation.trim()) {
-      return send(res, 502, { error: "The AI returned an empty lesson. Please try again." });
+    const explanation = (result?.candidates?.[0]?.content?.parts || [])
+      .map(part => typeof part.text === "string" ? part.text : "")
+      .join("\n")
+      .trim();
+
+    if (!explanation) {
+      const reason = result?.promptFeedback?.blockReason;
+      return send(res, 502, {
+        error: reason
+          ? "Google AI blocked this screenshot request (" + reason + "). Please try another screenshot."
+          : "Google AI returned an empty lesson. Please try again."
+      });
     }
 
     return send(res, 200, {
-      explanation: explanation.trim(),
-      model: result.model || process.env.OPENAI_MODEL || "gpt-4.1-mini"
+      explanation,
+      model: GEMINI_MODEL,
+      provider: "Google AI"
     });
   } catch (error) {
     if (error?.name === "AbortError") {
