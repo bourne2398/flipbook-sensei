@@ -62,25 +62,25 @@ body.modal-lock{overflow:hidden}
 </style>
 </head>
 <body>
-<header class="topbar"><div class="brand"><div class="brandmark">学</div><div><div class="brandname">Flipbook Sensei</div><div class="brandtag">Your personal AI lesson companion</div></div></div><div style="display:flex;align-items:center;gap:14px"><button class="btn btn-secondary" id="openGoogleAI" type="button">Google AI Mode ↗</button><div class="live">Learning studio ready</div></div></header>
+<header class="topbar"><div class="brand"><div class="brandmark">学</div><div><div class="brandname">Flipbook Sensei</div><div class="brandtag">Your Google AI lesson companion</div></div></div><div style="display:flex;align-items:center;gap:14px"><button class="btn btn-secondary" id="openGoogleAI" type="button">Google AI Mode ↗</button><div class="live">Learning studio ready</div></div></header>
 <main class="shell">
-<section class="hero"><div><div class="eyebrow">Read · Understand · Practice</div><h1>A better way to learn every page.</h1><p>Open your flipbook on the left. Share a page with Sensei on the right and receive a thoughtful, step-by-step lesson.</p></div><div class="hero-note">Your flipbook stays open beside your lesson, so you can read and learn at the same time.</div></section>
+<section class="hero"><div><div class="eyebrow">Read · Understand · Practice</div><h1>A better way to learn every page.</h1><p>Open your flipbook, capture a page, then send the screenshot to Google AI Mode for a Tagalog teacher script.</p></div><div class="hero-note">Your flipbook stays open beside your lesson, so you can read and learn at the same time.</div></section>
 <form class="bookbar" id="bookForm"><input id="bookUrl" class="field bookurl" type="url" placeholder="Paste your FlipHTML5 link" value="https://online.fliphtml5.com/Sibayan_Sensei/Day-1-Kaigo/#p=1" required><button class="btn btn-primary" type="submit">Open flipbook ↗</button></form>
 <section class="workspace">
 <article class="panel"><div class="panelhead"><div class="paneltitle">📖 Lesson preview</div><div style="display:flex;align-items:center;gap:10px"><span class="panelmeta" id="bookStatus">Ready to open</span><button class="btn btn-quiet" id="maximizePreview" type="button" title="Open full-screen preview">⛶ Maximize</button></div></div><div class="viewer" id="viewer"><div class="empty"><div><div class="emptyicon">▤</div><strong>Your lesson starts here</strong>Open a FlipHTML5 link above to begin reading.</div></div></div><div class="readerbar"><label for="pageNumber">Page</label><input id="pageNumber" class="field pagefield" type="number" min="1" max="99999" value="1"><button class="btn btn-secondary" id="goPage" type="button">Go</button><button class="btn capture-btn" id="capturePage" type="button">📸 Capture page for Sensei</button><span class="spacer"></span><button class="btn btn-quiet" id="copyBook" type="button">Copy link</button></div></article>
 <article class="panel teacher"><div class="panelhead"><div class="paneltitle">✦ Your AI teacher</div><span class="panelmeta">Vision-enabled lesson guide</span></div><div class="teacherbody">
-<div class="teacherprofile"><div class="avatar">先</div><div><strong>Sensei is ready to teach</strong><small>Patient explanations · Practical examples · Quick checks</small></div></div>
-<div class="notice">Pindutin ang <strong>Capture page for Sensei</strong> para kunan ang nakikitang pahina at awtomatikong gumawa ng lesson script sa Tagalog. Hihingi ang browser ng pahintulot na i-share ang kasalukuyang tab.</div>
-<div class="uploadbox"><div class="uploadcopy"><strong>📷 Add a page screenshot</strong><small>PNG, JPG, or WEBP · automatically optimized before upload</small></div><input id="pageImage" type="file" accept="image/png,image/jpeg,image/webp"></div>
+<div class="teacherprofile"><div class="avatar">先</div><div><strong>Sensei is ready to teach</strong><small>Google AI Mode · Screenshot-based teaching</small></div></div>
+<div class="notice">I-capture ang pahina, i-download ang screenshot, at buksan ang Google AI Mode. Ikabit ang screenshot sa Google at i-paste ang nakahandang prompt. Hindi kailangan ng API key.</div>
+<div class="uploadbox"><div class="uploadcopy"><strong>📷 Add a page screenshot</strong><small>PNG, JPG, or WEBP · attach it to Google AI Mode</small></div><input id="pageImage" type="file" accept="image/png,image/jpeg,image/webp"></div>
 <div class="imagepreview" id="imagePreview"><img id="previewThumb" alt="Selected lesson page"><span id="fileLabel">Screenshot selected</span><button id="removeImage" class="btn btn-quiet" type="button">Remove</button></div>
 <textarea id="question" class="field question" placeholder="May gusto ka bang bigyang-diin? Halimbawa: Ipaliwanag nang mas detalyado ang grammar at magbigay ng dagdag na halimbawa."></textarea>
-<div class="actionrow"><span class="hinttext" id="uploadStatus">No screenshot selected</span><button class="btn btn-primary" id="teachButton" type="button">Teach this page ✨</button></div>
-<div id="answer" class="answer placeholder" aria-live="polite">Dito lalabas ang lesson at teacher script sa Tagalog. I-capture ang pahina para magsimula.</div><div class="answer-tools"><button id="copyScript" class="btn btn-secondary copy-script" type="button" disabled>Copy teacher script</button></div>
+<div class="actionrow"><span class="hinttext" id="uploadStatus">No screenshot selected</span><button class="btn btn-primary" id="teachButton" type="button">Open Google AI Mode ✨</button></div>
+<div id="answer" class="answer placeholder" aria-live="polite">Pagkatapos buksan ang Google AI Mode, i-attach ang screenshot at i-paste ang nakahandang teacher prompt.</div><div class="answer-tools"><button id="copyScript" class="btn btn-secondary copy-script" type="button" disabled>Copy teacher prompt</button></div>
 </div></article>
 </section>
-<div class="footer">Flipbook Sensei · A focused learning workspace · API credentials are kept on the server</div>
+<div class="footer">Flipbook Sensei · Google AI Mode workflow · No API key required</div>
 </main>
-<div class="modal" id="googleModal" role="dialog" aria-modal="true" aria-label="Google AI Mode"><div class="modalbar"><span>Google AI Mode</span><div class="modalbar-actions"><button class="modalopen" id="openGoogleExternal" type="button">Open in new tab ↗</button><button class="modalclose" type="button" data-close="googleModal" aria-label="Close">×</button></div></div><iframe class="modalframe" id="googleFrame" title="Google AI Mode" src="about:blank" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+<div class="modal" id="googleModal" role="dialog" aria-modal="true" aria-label="Google AI Mode"><div class="modalbar"><span>Google AI Mode · Attach screenshot + paste prompt</span><div class="modalbar-actions"><button class="modalopen" id="downloadShot" type="button">Download screenshot ↓</button><button class="modalopen" id="copyPromptModal" type="button">Copy teacher prompt</button><button class="modalopen" id="openGoogleExternal" type="button">Open in new tab ↗</button><button class="modalclose" type="button" data-close="googleModal" aria-label="Close">×</button></div></div><div style="padding:10px 14px;color:#b7c8dc;font-size:12px">1. Download the screenshot. 2. Attach it using Google AI Mode’s image button. 3. Paste the copied prompt into Google AI Mode and send.</div><iframe class="modalframe" id="googleFrame" title="Google AI Mode" src="about:blank" referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
 <div class="modal" id="previewModal" role="dialog" aria-modal="true" aria-label="Full-screen flipbook preview"><div class="modalbar"><span>Flipbook preview</span><button class="modalclose" type="button" data-close="previewModal" aria-label="Close">×</button></div><div class="modalframe" id="largeViewer"></div></div>
 <script>
 const el=id=>document.getElementById(id);
@@ -88,6 +88,18 @@ const GOOGLE_AI_URL="https://www.google.com/ai";
 function openModal(id){el(id).classList.add("open");document.body.classList.add("modal-lock");}
 function closeModal(id){el(id).classList.remove("open");if(!document.querySelector(".modal.open"))document.body.classList.remove("modal-lock");}
 el("openGoogleAI").addEventListener("click",()=>{if(el("googleFrame").src==="about:blank")el("googleFrame").src=GOOGLE_AI_URL;openModal("googleModal");});
+function buildTeacherPrompt(){
+ const page=Number(el("pageNumber").value)||1;
+ const extra=el("question").value.trim();
+ return "Act as an expert, patient Japanese-language teacher teaching Filipino students. Carefully inspect the attached flipbook screenshot (page "+page+"). Treat the image as the source of truth; do not invent unreadable content. Create a complete, natural Filipino/Tagalog teacher script that I can read aloud in class.\n\nInclude: (1) lesson title and objectives, (2) a ready-to-speak teacher script with natural transitions, (3) all visible Japanese vocabulary with kanji/kana, kana reading, romaji, and Tagalog meaning, (4) grammar explanations in simple Tagalog, (5) Japanese example sentences with readings and Tagalog translations, (6) questions to ask students, (7) recap, (8) student practice exercises, and (9) answer key in a separate section. Preserve Japanese spelling accurately. Explain every important item visible in the screenshot. If text is unclear, identify it instead of guessing.\n\nAdditional teacher request: "+(extra||"Explain the entire page clearly and thoroughly for a beginner class.")+"\n\nWrite in natural spoken Tagalog, not English. Make the script detailed, classroom-ready, and easy to deliver aloud.";
+}
+async function copyTeacherPrompt(){
+ if(!lastPrompt)lastPrompt=buildTeacherPrompt();
+ try{await navigator.clipboard.writeText(lastPrompt);el("copyPromptModal").textContent="Copied ✓";setTimeout(()=>el("copyPromptModal").textContent="Copy teacher prompt",1500);}
+ catch{el("uploadStatus").textContent="Clipboard blocked. Copy the prompt from the lesson panel.";el("answer").textContent=lastPrompt;}
+}
+el("copyPromptModal").addEventListener("click",copyTeacherPrompt);
+el("downloadShot").addEventListener("click",()=>{if(!selectedFile){el("uploadStatus").textContent="Capture or select a screenshot first.";return;}const a=document.createElement("a");a.href=URL.createObjectURL(selectedFile);a.download=selectedFile.name||"flipbook-page.jpg";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000);});
 el("openGoogleExternal").addEventListener("click",()=>window.open(GOOGLE_AI_URL,"_blank","noopener,noreferrer"));
 document.querySelectorAll("[data-close]").forEach(button=>button.addEventListener("click",()=>closeModal(button.dataset.close)));
 document.querySelectorAll(".modal").forEach(modal=>modal.addEventListener("click",event=>{if(event.target===modal)closeModal(modal.id);}));
@@ -95,7 +107,7 @@ document.addEventListener("keydown",event=>{if(event.key==="Escape")document.que
 el("maximizePreview").addEventListener("click",()=>{const frame=el("viewer").querySelector("iframe");if(!frame){el("bookStatus").textContent="Open a flipbook first.";return;}const copy=frame.cloneNode(true);copy.style.cssText="width:100%;height:100%;border:0;background:#fff";el("largeViewer").replaceChildren(copy);openModal("previewModal");});
 
 const DEFAULT_BOOK="https://online.fliphtml5.com/Sibayan_Sensei/Day-1-Kaigo/#p=1";
-let selectedFile=null,previewUrl=null;
+let selectedFile=null,previewUrl=null,lastPrompt="";
 function validBookUrl(value){const url=new URL(value);if(!["https:","http:"].includes(url.protocol))throw new Error("Enter a valid http or https URL.");return url;}
 function showBook(){try{const url=validBookUrl(el("bookUrl").value.trim());el("bookUrl").value=url.href;const frame=document.createElement("iframe");frame.title="FlipHTML5 lesson preview";frame.allowFullscreen=true;frame.loading="lazy";frame.referrerPolicy="strict-origin-when-cross-origin";frame.src=url.href;el("viewer").replaceChildren(frame);el("bookStatus").textContent="Flipbook opened";const match=url.hash.match(/(?:^|[&#])p=(\d+)/);el("pageNumber").value=match?match[1]:"1";}catch(error){el("bookStatus").textContent=error.message;}}
 el("bookForm").addEventListener("submit",event=>{event.preventDefault();showBook();});
@@ -104,29 +116,16 @@ el("copyBook").addEventListener("click",async()=>{try{await navigator.clipboard.
 function clearImage(){selectedFile=null;if(previewUrl)URL.revokeObjectURL(previewUrl);previewUrl=null;el("pageImage").value="";el("imagePreview").classList.remove("visible");el("uploadStatus").textContent="No screenshot selected";}
 el("removeImage").addEventListener("click",clearImage);
 el("pageImage").addEventListener("change",()=>{const file=el("pageImage").files?.[0];if(!file)return;if(!["image/png","image/jpeg","image/webp"].includes(file.type)){el("uploadStatus").textContent="Choose a PNG, JPG, or WEBP image.";return;}selectedFile=file;if(previewUrl)URL.revokeObjectURL(previewUrl);previewUrl=URL.createObjectURL(file);el("previewThumb").src=previewUrl;el("fileLabel").textContent=file.name;el("imagePreview").classList.add("visible");el("uploadStatus").textContent="Screenshot ready";});
-async function optimizeImage(file){const image=await createImageBitmap(file);const scale=Math.min(1,1800/Math.max(image.width,image.height));const canvas=document.createElement("canvas");canvas.width=Math.round(image.width*scale);canvas.height=Math.round(image.height*scale);canvas.getContext("2d").drawImage(image,0,0,canvas.width,canvas.height);image.close();let quality=.86;let blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/jpeg",quality));while(blob.size>2.8*1024*1024&&quality>.48){quality-=.1;blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/jpeg",quality));}if(blob.size>3.2*1024*1024)throw new Error("This image is too large to process. Please choose a smaller screenshot.");return await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=()=>reject(new Error("Could not read the screenshot."));reader.readAsDataURL(blob);});}
-function setAnswer(message,kind=""){el("answer").className="answer"+(kind?" "+kind:"");el("answer").textContent=message;el("copyScript").disabled=kind==="loading"||kind==="error"||kind==="placeholder";el("copyScript").dataset.script=kind?"":message;}
+function setAnswer(message,kind=""){el("answer").className="answer"+(kind?" "+kind:"");el("answer").textContent=message;el("copyScript").disabled=!lastPrompt;el("copyScript").dataset.script=lastPrompt;}
 async function teachSelectedPage(){
  if(!selectedFile){setAnswer("Walang screenshot. Pumili muna ng screenshot o gamitin ang Capture page for Sensei.","error");return;}
- const button=el("teachButton"),capture=el("capturePage");
- button.disabled=true;capture.disabled=true;button.textContent="Inihahanda ang lesson…";
- setAnswer("Binabasa ni Sensei ang pahina at gumagawa ng teacher script sa Tagalog. Sandali lang…","loading");
- try{
-  const image=await optimizeImage(selectedFile);button.textContent="Gumagawa ng teacher script…";
-  const response=await fetch("/api/teach",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({image,question:el("question").value.trim(),book_url:el("bookUrl").value.trim(),page:Number(el("pageNumber").value)||1})});
-  const payload=await response.json().catch(()=>({error:"Hindi mabasa ang sagot ng server."}));
-  if(!response.ok)throw new Error(payload.error||"Hindi nagawa ang lesson.");
-  if(!payload.explanation)throw new Error("Walang laman ang sagot ng AI. Subukan ulit.");
-  setAnswer(payload.explanation);el("answer").scrollIntoView({behavior:"smooth",block:"nearest"});
- }catch(error){setAnswer("Hindi nagawa ang lesson. "+(error.message||"Subukan ulit."),"error");}
- finally{button.disabled=false;capture.disabled=false;button.textContent="Teach this page ✨";}
+ lastPrompt=buildTeacherPrompt();
+ setAnswer("Handa na ang screenshot at teacher prompt. Sa Google AI Mode modal, i-download ang screenshot, i-attach ito sa Google, at i-paste ang prompt. Google AI mismo ang gagawa ng lesson script.");
+ if(el("googleFrame").src==="about:blank")el("googleFrame").src=GOOGLE_AI_URL;
+ openModal("googleModal");
 }
 el("teachButton").addEventListener("click",teachSelectedPage);
-el("copyScript").addEventListener("click",async()=>{
- const script=el("copyScript").dataset.script;if(!script)return;
- try{await navigator.clipboard.writeText(script);el("copyScript").textContent="Copied ✓";setTimeout(()=>el("copyScript").textContent="Copy teacher script",1600);}
- catch{el("uploadStatus").textContent="Hindi ma-access ang clipboard. Piliin at kopyahin ang script manually.";}
-});
+el("copyScript").addEventListener("click",copyTeacherPrompt);
 async function capturePreviewPage(){
  if(!navigator.mediaDevices?.getDisplayMedia){setAnswer("Hindi suportado ng browser ang automatic screenshot. Gamitin ang manual screenshot upload sa ibaba.","error");return;}
  const button=el("capturePage");button.disabled=true;button.textContent="Piliin ang tab…";let stream;
@@ -145,7 +144,7 @@ async function capturePreviewPage(){
   selectedFile=new File([blob],"flipbook-page-"+(Number(el("pageNumber").value)||1)+".jpg",{type:"image/jpeg"});
   if(previewUrl)URL.revokeObjectURL(previewUrl);previewUrl=URL.createObjectURL(selectedFile);
   el("previewThumb").src=previewUrl;el("fileLabel").textContent=selectedFile.name;el("imagePreview").classList.add("visible");
-  el("uploadStatus").textContent="Na-capture ang page. Ginagawa ang lesson…";await teachSelectedPage();
+  el("uploadStatus").textContent="Screenshot captured. Opening Google AI Mode…";await teachSelectedPage();
  }catch(error){
   if(error.name==="NotAllowedError")setAnswer("Kinansela ang screen capture. Pindutin ulit at piliin ang kasalukuyang tab (Flipbook Sensei).","error");
   else setAnswer("Hindi makuha ang screenshot. "+(error.message||"Subukan ang manual upload."),"error");
