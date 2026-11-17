@@ -1,48 +1,32 @@
 # Flipbook Sensei
 
-A clean FlipHTML5 companion that displays a flipbook beside an AI teacher. The learner uploads a screenshot of the current page; the server sends that image to OpenAI Vision and returns a structured, teacher-style explanation.
+A static FlipHTML5 learning workspace with a server-side AI teacher.
 
-## Features
+## Architecture
 
-- Responsive two-column learning workspace (book preview + AI teacher)
-- Opens FlipHTML5 links directly in an embedded viewer
-- Page navigation helper using the FlipHTML5 `#p=` page fragment
-- Screenshot-based explanations grounded in the visible page
-- Vocabulary, grammar/terms, examples, recap, and short comprehension checks
-- OpenAI key stays on the server; it is never exposed to browser JavaScript
-- Vercel deployment; no Render account or separate backend host required
+- `index.html` is the static homepage served at `/`.
+- `api/teach.js` is a Vercel Node.js Function served at `POST /api/teach`.
+- The browser uploads an optimized page screenshot to the API.
+- The API sends the screenshot to OpenAI using the server-side `OPENAI_API_KEY`.
 
-## Deploy on Vercel
+There is no Python runtime, Python entrypoint, build step, or external Node dependency.
 
-1. Open [Vercel](https://vercel.com/new) and import `bourne2398/flipbook-sensei`.
-2. Keep the project root as the Root Directory.
-3. Add an Environment Variable:
-   - Name: `OPENAI_API_KEY`
-   - Value: your OpenAI API key
-   - Environments: Production, Preview, and Development as needed
-4. Deploy. Redeploy after changing environment variables.
+## Vercel setup
 
-Optional:
-- `OPENAI_MODEL`: defaults to `gpt-4.1-mini`.
+1. Import this repository into Vercel.
+2. Set Framework Preset to **Other**.
+3. Leave Root Directory blank.
+4. Leave Build Command and Output Directory unset.
+5. Add `OPENAI_API_KEY` to the Production environment variables.
+6. Optionally set `OPENAI_MODEL` (defaults to `gpt-4.1-mini`).
+7. Deploy the `main` branch.
 
-## Use
+## Routes
 
-1. Open the deployed site.
-2. Paste a public FlipHTML5 URL and click **Open flipbook**.
-3. Navigate to the page in the viewer.
-4. Take a screenshot of that page and upload it under **Add a page screenshot**.
-5. Ask Sensei to teach the page and click **Teach this page**.
+- `GET /` serves the static learning studio.
+- `POST /api/teach` generates a teacher-style explanation.
+- Other methods on `/api/teach` return HTTP 405.
 
-## Important note about the flipbook
+## Notes
 
-FlipHTML5 content is hosted on another domain. Browser security prevents this app from reading the flipbook iframe's page contents automatically. Uploading a screenshot is the reliable way to let the AI inspect the exact lesson page. The book itself remains embedded and viewable in the app.
-
-## API
-
-`POST /api/explain` accepts JSON with:
-- `image`: a PNG/JPEG/WEBP data URL (maximum 8 MB)
-- `question`: optional learner instruction
-- `book_url`: optional source URL for context
-- `page`: optional page number
-
-The endpoint validates the image and calls OpenAI from the server using `OPENAI_API_KEY`.
+FlipHTML5 embeds are cross-origin. The app cannot read the flipbook's internal page content directly, so the learner supplies a screenshot for accurate visual explanation. API credentials are never sent to the browser.
