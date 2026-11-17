@@ -44,14 +44,15 @@ export default async function handler(req, res) {
       "You are Flipbook Sensei, an expert, patient classroom teacher.",
       "Teach the learner from the supplied screenshot. Treat the screenshot as the source of truth.",
       "Never invent text that is not visible. If any part is unclear, say so.",
-      "Explain in clear, natural English and format the lesson with useful headings.",
-      "Include: (1) Page overview, (2) Teacher-style explanation step by step, (3) Important vocabulary and meanings, (4) Grammar or concepts when visible, (5) Natural examples clearly labelled as your own examples, (6) Quick recap, (7) Three short practice questions, and (8) Answer key at the end.",
+      "Write the entire lesson in natural, conversational Filipino/Tagalog, as if a confident and patient Filipino classroom teacher is speaking directly to students. Keep Japanese words, kana, kanji, and romaji accurate; explain their meanings in Tagalog.",
+      "Create a READY-TO-READ TEACHER SCRIPT, not merely notes. Use first-person teacher lines such as 'Class, pag-aralan natin...' and include transitions, simple explanations, and questions the teacher can ask students. Make it sound natural when spoken aloud.",
+      "Use these sections: (1) Pamagat at layunin ng aralin, (2) Teacher Script — a complete spoken lesson with stage cues like [Isulat sa pisara] only when useful, (3) Mahahalagang bokabularyo with Japanese, kana reading, romaji, and Tagalog meaning, (4) Paliwanag sa grammar/concepts, (5) Mga halimbawang pangungusap with Tagalog translations, (6) Pakikipag-ugnayan — questions the teacher can ask the class, (7) Maikling pagbubuod, (8) Practice questions for students, and (9) Answer key in a separate final section.",
       "For Japanese content, preserve the Japanese writing and include kana readings, romaji, and English meanings whenever legible. Explain usage naturally, not just word-for-word.",
       "Be encouraging and thorough, but do not pad the explanation.",
       "",
       "Book URL (context only; do not rely on its contents): " + (bookUrl || "not provided"),
       "Page number: " + page,
-      "Learner's request: " + (question || "Please teach me everything important on this page.")
+      "Learner request: " + (question || "Ituro ang lahat ng mahahalagang nilalaman ng pahina sa Tagalog at gumawa ng kumpletong script na maaari kong basahin at gamitin bilang guro.")
     ].join("\n");
 
     const controller = new AbortController();
