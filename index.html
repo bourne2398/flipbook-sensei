@@ -90,7 +90,7 @@ body.modal-lock{overflow:hidden}
 </section>
 <div class="footer">Flipbook Sensei · Google AI Mode workflow · No API key required</div>
 </main>
-<div class="modal" id="googleModal" role="dialog" aria-modal="true" aria-label="Teacher lesson script"><div class="modalbar"><span>✦ Teacher Lesson Script</span><div class="modalbar-actions"><button class="modalopen" id="copyImageAndOpenGoogle" type="button">Copy image + prompt &amp; open Google AI ↗</button><button class="modalopen" id="copyPromptModal" type="button">Copy prompt</button><button class="modalclose" type="button" data-close="googleModal" aria-label="Close">×</button></div></div><div class="script-workspace"><div class="script-help" id="googleHandoffStatus">Your flipbook screenshot and teacher prompt are ready. Click “Copy image + prompt &amp; open Google AI”. In Google AI, paste (Ctrl+V) into the message box, then generate. Return to this tab and paste Google's generated teacher script below.</div><section id="pasteScriptPanel" class="paste-script-panel"><label for="googleAnswerInput">Paste Google's generated teacher script</label><textarea id="googleAnswerInput" class="field script-input" placeholder="Paste the complete Tagalog teacher script here…"></textarea><div class="script-actions"><button class="btn btn-primary" id="displayGoogleAnswer" type="button">Display teacher script</button></div></section><section id="teacherScriptPanel" class="teacher-script-panel" hidden><div class="script-actions"><button class="btn btn-secondary" id="editGoogleAnswer" type="button">Paste another answer</button><button class="btn btn-secondary" id="copyGoogleAnswer" type="button">Copy script</button><button class="btn btn-secondary" id="downloadGoogleAnswer" type="button">Download script</button></div><pre id="teacherScriptOutput" class="teacher-script-output"></pre></section></div></div>
+<div class="modal" id="googleModal" role="dialog" aria-modal="true" aria-label="Teacher lesson script"><div class="modalbar"><span>✦ Teacher Lesson Script</span><div class="modalbar-actions"><button class="modalopen" id="copyImageAndOpenGoogle" type="button">Copy image + prompt</button><button class="modalopen" id="openGoogleAfterCopy" type="button" hidden>Open Google AI ↗</button><button class="modalopen" id="copyPromptModal" type="button">Copy prompt</button><button class="modalclose" type="button" data-close="googleModal" aria-label="Close">×</button></div></div><div class="script-workspace"><div class="script-help" id="googleHandoffStatus">Your flipbook screenshot and teacher prompt are ready. Click “Copy image + prompt &amp; open Google AI”. In Google AI, paste (Ctrl+V) into the message box, then generate. Return to this tab and paste Google's generated teacher script below.</div><section id="pasteScriptPanel" class="paste-script-panel"><label for="googleAnswerInput">Paste Google's generated teacher script</label><textarea id="googleAnswerInput" class="field script-input" placeholder="Paste the complete Tagalog teacher script here…"></textarea><div class="script-actions"><button class="btn btn-primary" id="displayGoogleAnswer" type="button">Display teacher script</button></div></section><section id="teacherScriptPanel" class="teacher-script-panel" hidden><div class="script-actions"><button class="btn btn-secondary" id="editGoogleAnswer" type="button">Paste another answer</button><button class="btn btn-secondary" id="copyGoogleAnswer" type="button">Copy script</button><button class="btn btn-secondary" id="downloadGoogleAnswer" type="button">Download script</button></div><pre id="teacherScriptOutput" class="teacher-script-output"></pre></section></div></div>
 <div class="modal" id="previewModal" role="dialog" aria-modal="true" aria-label="Full-screen flipbook preview"><div class="modalbar"><span>Flipbook preview</span><button class="modalclose" type="button" data-close="previewModal" aria-label="Close">×</button></div><div class="modalframe" id="largeViewer"></div></div>
 <script>
 const el=id=>document.getElementById(id);
@@ -112,32 +112,39 @@ el("copyPromptModal").addEventListener("click",copyTeacherPrompt);
 async function copyImagePromptAndOpenGoogle(){
  if(!selectedFile){el("googleHandoffStatus").textContent="Capture the flipbook page first.";return;}
  if(!lastPrompt)lastPrompt=buildTeacherPrompt();
- const button=el("copyImageAndOpenGoogle");button.disabled=true;button.textContent="Copying…";let googleTab=null;
+ const button=el("copyImageAndOpenGoogle");
+ const openButton=el("openGoogleAfterCopy");
+ button.disabled=true;button.textContent="Copying…";openButton.hidden=true;
  try{
-  if(!navigator.clipboard?.write||!window.ClipboardItem)throw new Error("This browser does not support copying an image and text together.");
+  if(!navigator.clipboard?.write||!window.ClipboardItem)throw new Error("This browser does not support image clipboard writing.");
   let png=selectedPngBlob;
-  if(!png){const bitmap=await createImageBitmap(selectedFile);const canvas=document.createElement("canvas");canvas.width=bitmap.width;canvas.height=bitmap.height;canvas.getContext("2d").drawImage(bitmap,0,0);png=await new Promise(resolve=>canvas.toBlob(resolve,"image/png"));bitmap.close?.();}
+  if(!png){
+   const bitmap=await createImageBitmap(selectedFile);
+   try{
+    const canvas=document.createElement("canvas");canvas.width=bitmap.width;canvas.height=bitmap.height;
+    const context=canvas.getContext("2d");if(!context)throw new Error("Could not prepare the screenshot.");
+    context.drawImage(bitmap,0,0);
+    png=await new Promise(resolve=>canvas.toBlob(resolve,"image/png"));
+   }finally{bitmap.close?.();}
+  }
   if(!png)throw new Error("Could not prepare the flipbook image.");
   const item=new ClipboardItem({
    "image/png":png,
    "text/plain":new Blob([lastPrompt],{type:"text/plain"})
   });
-  // Start clipboard write while this tab still has focus, then open Google in the same click.
-  const clipboardWrite=navigator.clipboard.write([item]);
-  googleTab=window.open(GOOGLE_AI_URL,"_blank");
-  if(googleTab)try{googleTab.opener=null;}catch{}
-  await clipboardWrite;
-  el("googleHandoffStatus").textContent=googleTab
-   ?"Screenshot and Tagalog teacher prompt copied together. In the Google AI tab, click the message box and press Ctrl+V. Check that the image and prompt appear, then generate. Return here to paste the generated script."
-   :"Screenshot and prompt copied together, but the Google tab was blocked. Open Google AI using the button below and press Ctrl+V in its message box.";
+  await navigator.clipboard.write([item]);
+  openButton.hidden=false;
+  el("googleHandoffStatus").textContent="Copied! The screenshot and Tagalog teacher prompt are on your clipboard. Now click “Open Google AI”. In its message box, press Ctrl+V. If Google accepts only the image or only the text, use “Copy prompt” separately for the prompt.";
   button.textContent="Copied ✓";
  }catch(error){
-  if(!googleTab)googleTab=window.open(GOOGLE_AI_URL,"_blank");
-  if(googleTab)try{googleTab.opener=null;}catch{}
-  el("googleHandoffStatus").textContent="Google AI was opened. Automatic combined clipboard copy was blocked: "+(error.message||"permission denied")+". Use “Copy prompt”, then attach the screenshot manually.";
-  button.textContent="Retry copy + open Google AI";
+  el("googleHandoffStatus").textContent="Clipboard copy failed: "+(error.message||"permission denied")+". Your screenshot is still selected. Try again, or use “Copy prompt” and attach the screenshot manually.";
+  button.textContent="Retry copy image + prompt";
  }finally{button.disabled=false;}
 }
+el("openGoogleAfterCopy").addEventListener("click",()=>{
+ window.open(GOOGLE_AI_URL,"_blank","noopener,noreferrer");
+});
+
 el("copyImageAndOpenGoogle").addEventListener("click",copyImagePromptAndOpenGoogle);
 el("displayGoogleAnswer").addEventListener("click",()=>{
  const answer=el("googleAnswerInput").value.trim();
@@ -179,7 +186,7 @@ async function teachSelectedPage(){
  el("googleAnswerInput").value="";
  el("pasteScriptPanel").hidden=false;el("teacherScriptPanel").hidden=true;
  el("googleHandoffStatus").textContent="Your flipbook screenshot and teacher prompt are ready. Click “Copy image + prompt & open Google AI”. In Google AI, paste (Ctrl+V) into the message box, then generate. Return to this tab and paste the generated teacher script.";
- el("copyImageAndOpenGoogle").disabled=false;el("copyImageAndOpenGoogle").textContent="Copy image + prompt & open Google AI ↗";
+ el("copyImageAndOpenGoogle").disabled=false;el("copyImageAndOpenGoogle").textContent="Copy image + prompt";el("openGoogleAfterCopy").hidden=true;
  openModal("googleModal");
 }
 el("teachButton").addEventListener("click",teachSelectedPage);
