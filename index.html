@@ -43,7 +43,7 @@ $("pageImage").addEventListener("change",()=>{$("fileName").textContent=$("pageI
 $("teach").addEventListener("click",async()=>{const file=$("pageImage").files[0];if(!file){$("answer").className="response";$("answer").textContent="Please upload a screenshot of the page first. This lets Sensei explain the real lesson content accurately.";return}if(file.size>8*1024*1024){$("answer").textContent="That image is larger than 8 MB. Please choose a smaller screenshot.";return}
 const btn=$("teach");btn.disabled=true;btn.textContent="Preparing lesson…";$("answer").className="response";$("answer").textContent="Sensei is reading your page and preparing the lesson…";
 try{const data=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;r.readAsDataURL(file)});
-const res=await fetch("/api/explain",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({image:data,question:$("question").value,book_url:$("bookUrl").value,page:Number($("pageNo").value)||1})});
+const res=await fetch("/api",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({image:data,question:$("question").value,book_url:$("bookUrl").value,page:Number($("pageNo").value)||1})});
 const body=await res.json().catch(()=>({error:"The server returned an unreadable response."}));if(!res.ok)throw new Error(body.error||"The lesson could not be generated.");$("answer").textContent=body.explanation||"No explanation was returned."}
 catch(e){$("answer").textContent="Unable to generate the lesson. "+e.message}
 finally{btn.disabled=false;btn.textContent="Teach this page ✨"}});
