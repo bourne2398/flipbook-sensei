@@ -25,6 +25,15 @@ button,input,textarea{font:inherit}button{cursor:pointer}.topbar{height:76px;bor
 .script-input{width:100%;min-height:180px;flex:1;resize:vertical;background:#101b2b;color:#f1f5fb;border:1px solid #354964;border-radius:10px;padding:14px;font-family:inherit;font-size:13px;line-height:1.6}
 .script-actions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;flex:none}
 .teacher-script-output{white-space:pre-wrap;overflow-wrap:anywhere;word-break:normal;color:#172033;background:#fff;border:1px solid #d8dee8;border-radius:12px;padding:24px;min-height:0;flex:1;overflow-y:auto;overscroll-behavior:contain;box-shadow:0 2px 12px #00000012;font:15px/1.8 Arial,sans-serif}
+
+/* Full-screen reading mode for the generated teacher script. */
+#googleModal.reading-mode{padding:0;background:#fff}
+#googleModal.reading-mode .modalbar{height:56px;min-height:56px;padding:6px 14px;background:#0a1020;color:#f4f7fb}
+#googleModal.reading-mode .script-workspace{padding:0;gap:0;background:#fff}
+#googleModal.reading-mode .script-help{display:none}
+#googleModal.reading-mode .teacher-script-panel{gap:0}
+#googleModal.reading-mode .teacher-script-panel .script-actions{padding:8px 14px;background:#f1f3f6;border-bottom:1px solid #d8dee8}
+#googleModal.reading-mode .teacher-script-output{width:100%;border:0;border-radius:0;box-shadow:none;padding:30px clamp(20px,6vw,100px);font-size:17px;line-height:1.9;background:#fff;color:#172033}
 [hidden]{display:none!important}
 @media(max-width:560px){.script-workspace{padding:5px 4px 10px}.script-actions>*{flex:1}.teacher-script-output{padding:15px;font-size:14px}.modalbar-actions{gap:5px}.modalopen{padding:7px 8px;font-size:11px}}
 
@@ -96,7 +105,7 @@ body.modal-lock{overflow:hidden}
 const el=id=>document.getElementById(id);
 const GOOGLE_AI_URL="https://www.google.com/ai";
 function openModal(id){el(id).classList.add("open");document.body.classList.add("modal-lock");}
-function closeModal(id){el(id).classList.remove("open");if(!document.querySelector(".modal.open"))document.body.classList.remove("modal-lock");}
+function closeModal(id){el(id).classList.remove("open");if(id==="googleModal")el(id).classList.remove("reading-mode");if(!document.querySelector(".modal.open"))document.body.classList.remove("modal-lock");}
 el("openGoogleAI").addEventListener("click",()=>openModal("googleModal"));
 function buildTeacherPrompt(){
  const page=Number(el("pageNumber").value)||1;
@@ -150,9 +159,9 @@ el("displayGoogleAnswer").addEventListener("click",()=>{
  const answer=el("googleAnswerInput").value.trim();
  if(!answer){el("googleAnswerInput").focus();return;}
  el("teacherScriptOutput").textContent=answer;
- el("pasteScriptPanel").hidden=true;el("teacherScriptPanel").hidden=false;
+ el("pasteScriptPanel").hidden=true;el("teacherScriptPanel").hidden=false;el("googleModal").classList.add("reading-mode");
 });
-el("editGoogleAnswer").addEventListener("click",()=>{el("pasteScriptPanel").hidden=false;el("teacherScriptPanel").hidden=true;el("googleAnswerInput").focus();});
+el("editGoogleAnswer").addEventListener("click",()=>{el("pasteScriptPanel").hidden=false;el("teacherScriptPanel").hidden=true;el("googleModal").classList.remove("reading-mode");el("googleAnswerInput").focus();});
 el("copyGoogleAnswer").addEventListener("click",async()=>{
  const answer=el("teacherScriptOutput").textContent;
  try{await navigator.clipboard.writeText(answer);el("copyGoogleAnswer").textContent="Copied ✓";setTimeout(()=>el("copyGoogleAnswer").textContent="Copy script",1500);}
@@ -184,7 +193,7 @@ async function teachSelectedPage(){
  lastPrompt=buildTeacherPrompt();
  setAnswer("Handa na ang screenshot at teacher prompt. Buksan ang Google AI sa hiwalay na tab, pagkatapos ay bumalik dito at i-paste ang generated teacher script.");
  el("googleAnswerInput").value="";
- el("pasteScriptPanel").hidden=false;el("teacherScriptPanel").hidden=true;
+ el("pasteScriptPanel").hidden=false;el("teacherScriptPanel").hidden=true;el("googleModal").classList.remove("reading-mode");
  el("googleHandoffStatus").textContent="Your flipbook screenshot and teacher prompt are ready. Click “Copy image + prompt & open Google AI”. In Google AI, paste (Ctrl+V) into the message box, then generate. Return to this tab and paste the generated teacher script.";
  el("copyImageAndOpenGoogle").disabled=false;el("copyImageAndOpenGoogle").textContent="Copy image + prompt";el("openGoogleAfterCopy").hidden=true;
  openModal("googleModal");
