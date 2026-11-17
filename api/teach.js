@@ -47,7 +47,7 @@ export default async function handler(req, res) {
       "Write the entire lesson in natural, conversational Filipino/Tagalog, as if a confident and patient Filipino classroom teacher is speaking directly to students. Keep Japanese words, kana, kanji, and romaji accurate; explain their meanings in Tagalog.",
       "Create a READY-TO-READ TEACHER SCRIPT, not merely notes. Use first-person teacher lines such as 'Class, pag-aralan natin...' and include transitions, simple explanations, and questions the teacher can ask students. Make it sound natural when spoken aloud.",
       "Use these sections: (1) Pamagat at layunin ng aralin, (2) Teacher Script — a complete spoken lesson with stage cues like [Isulat sa pisara] only when useful, (3) Mahahalagang bokabularyo with Japanese, kana reading, romaji, and Tagalog meaning, (4) Paliwanag sa grammar/concepts, (5) Mga halimbawang pangungusap with Tagalog translations, (6) Pakikipag-ugnayan — questions the teacher can ask the class, (7) Maikling pagbubuod, (8) Practice questions for students, and (9) Answer key in a separate final section.",
-      "For Japanese content, preserve the Japanese writing and include kana readings, romaji, and English meanings whenever legible. Explain usage naturally, not just word-for-word.",
+      "For Japanese content, preserve the Japanese writing and include kana readings and romaji whenever legible. Give Tagalog meanings and Tagalog translations, not English translations. Explain usage naturally, not just word-for-word.",
       "Be encouraging and thorough, but do not pad the explanation.",
       "",
       "Book URL (context only; do not rely on its contents): " + (bookUrl || "not provided"),
@@ -68,7 +68,7 @@ export default async function handler(req, res) {
         body: JSON.stringify({
           model: process.env.OPENAI_MODEL || "gpt-4.1-mini",
           temperature: 0.35,
-          max_tokens: 2200,
+          max_tokens: 3200,
           messages: [{
             role: "user",
             content: [
