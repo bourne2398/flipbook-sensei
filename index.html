@@ -37,7 +37,7 @@ button,input,textarea{font:inherit}button{cursor:pointer}.topbar{height:76px;bor
 [hidden]{display:none!important}
 @media(max-width:560px){.script-workspace{padding:5px 4px 10px}.script-actions>*{flex:1}.teacher-script-output{padding:15px;font-size:14px}.modalbar-actions{gap:5px}.modalopen{padding:7px 8px;font-size:11px}}
 
-#previewModal .modalframe{background:#080e18}
+#previewModal{padding:0;background:#050914}\n#previewModal .modalbar{height:44px;min-height:44px;padding:0 14px;background:#0a1020;border:0}\n#previewModal .modalframe{background:#080e18;border:0;border-radius:0}\n#previewModal:fullscreen{width:100vw;height:100vh;inset:0;padding:0;background:#050914}\n#previewModal:fullscreen .modalframe{flex:1;min-height:0}\n#previewModal .modalclose{flex:none}
 body.modal-lock{overflow:hidden}
 @media(max-width:560px){.modal{padding:6px}.modalbar{height:48px}}
 @media(max-width:980px){.shell{padding:28px 18px 44px}.workspace{grid-template-columns:1fr}.viewer{height:62vh;min-height:390px}.teacher{min-height:620px}.hero-note{display:none}}
@@ -104,8 +104,9 @@ body.modal-lock{overflow:hidden}
 <script>
 const el=id=>document.getElementById(id);
 const GOOGLE_AI_URL="https://www.google.com/ai";
+let previewPlaceholder=null;
 function openModal(id){el(id).classList.add("open");document.body.classList.add("modal-lock");}
-function closeModal(id){el(id).classList.remove("open");if(id==="googleModal")el(id).classList.remove("reading-mode");if(!document.querySelector(".modal.open"))document.body.classList.remove("modal-lock");}
+function closeModal(id){el(id).classList.remove("open");if(id==="googleModal")el(id).classList.remove("reading-mode");if(id==="previewModal"){if(previewPlaceholder?.parentNode){previewPlaceholder.parentNode.insertBefore(el("viewer").querySelector("iframe")||el("largeViewer").querySelector("iframe"),previewPlaceholder);previewPlaceholder.remove();previewPlaceholder=null;}if(document.fullscreenElement===el("previewModal"))document.exitFullscreen?.().catch(()=>{});}if(!document.querySelector(".modal.open"))document.body.classList.remove("modal-lock");}
 el("openGoogleAI").addEventListener("click",()=>openModal("googleModal"));
 function buildTeacherPrompt(){
  const page=Number(el("pageNumber").value)||1;
@@ -175,7 +176,7 @@ el("downloadGoogleAnswer").addEventListener("click",()=>{
 document.querySelectorAll("[data-close]").forEach(button=>button.addEventListener("click",()=>closeModal(button.dataset.close)));
 document.querySelectorAll(".modal").forEach(modal=>modal.addEventListener("click",event=>{if(event.target===modal)closeModal(modal.id);}));
 document.addEventListener("keydown",event=>{if(event.key==="Escape")document.querySelectorAll(".modal.open").forEach(modal=>closeModal(modal.id));});
-el("maximizePreview").addEventListener("click",()=>{const frame=el("viewer").querySelector("iframe");if(!frame){el("bookStatus").textContent="Open a flipbook first.";return;}const copy=frame.cloneNode(true);copy.style.cssText="width:100%;height:100%;border:0;background:#fff";el("largeViewer").replaceChildren(copy);openModal("previewModal");});
+el("maximizePreview").addEventListener("click",async()=>{const frame=el("viewer").querySelector("iframe");if(!frame){el("bookStatus").textContent="Open a flipbook first.";return;}previewPlaceholder=document.createComment("flipbook iframe position");frame.parentNode.insertBefore(previewPlaceholder,frame);frame.style.cssText="display:block;width:100%;height:100%;min-height:0;border:0;border-radius:0;background:#fff";el("largeViewer").replaceChildren(frame);openModal("previewModal");try{if(el("previewModal").requestFullscreen)await el("previewModal").requestFullscreen();}catch(error){console.warn("Browser fullscreen unavailable; using full-window preview.",error);}});
 
 const DEFAULT_BOOK="https://online.fliphtml5.com/Sibayan_Sensei/Day-1-Kaigo/#p=1";
 let selectedFile=null,selectedPngBlob=null,previewUrl=null,lastPrompt="";
