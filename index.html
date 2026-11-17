@@ -18,15 +18,15 @@ button,input,textarea{font:inherit}button{cursor:pointer}.topbar{height:76px;bor
 .modalframe{flex:1;min-height:0;width:100%;border:1px solid var(--line);border-radius:12px;background:#fff}
 .modalclose{width:40px;height:40px;border:1px solid #42536d;border-radius:10px;background:#1b2940;color:#fff;font-size:23px;line-height:1}
 .modalopen{background:#263752;color:#e7effa;border:1px solid #3a4e6a;border-radius:9px;padding:8px 12px;font-weight:700}
-.script-workspace{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:14px;padding:8px 12px 16px}
-.script-help{color:#c6d3e4;background:#17263a;border:1px solid #30435e;border-radius:10px;padding:13px 15px;font-size:13px;line-height:1.55}
-.paste-script-panel,.teacher-script-panel{display:flex;flex-direction:column;gap:10px;min-height:0}
+.script-workspace{flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;gap:12px;padding:8px 12px 12px}
+.script-help{flex:none;color:#c6d3e4;background:#17263a;border:1px solid #30435e;border-radius:10px;padding:11px 14px;font-size:13px;line-height:1.5}
+.paste-script-panel,.teacher-script-panel{display:flex;flex-direction:column;gap:10px;min-height:0;flex:1;overflow:hidden}
 .paste-script-panel label{font-size:13px;font-weight:800;color:var(--text)}
-.script-input{width:100%;min-height:220px;resize:vertical;background:#101b2b;color:#f1f5fb;border:1px solid #354964;border-radius:10px;padding:14px;font-family:inherit;font-size:13px;line-height:1.6}
-.script-actions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
-.teacher-script-output{white-space:pre-wrap;overflow-wrap:anywhere;color:#172033;background:#fff;border-radius:12px;padding:22px;min-height:260px;max-height:none;overflow:visible;font:14px/1.75 Arial,sans-serif}
+.script-input{width:100%;min-height:180px;flex:1;resize:vertical;background:#101b2b;color:#f1f5fb;border:1px solid #354964;border-radius:10px;padding:14px;font-family:inherit;font-size:13px;line-height:1.6}
+.script-actions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;flex:none}
+.teacher-script-output{white-space:pre-wrap;overflow-wrap:anywhere;word-break:normal;color:#172033;background:#fff;border:1px solid #d8dee8;border-radius:12px;padding:24px;min-height:0;flex:1;overflow-y:auto;overscroll-behavior:contain;box-shadow:0 2px 12px #00000012;font:15px/1.8 Arial,sans-serif}
 [hidden]{display:none!important}
-@media(max-width:560px){.script-workspace{padding:5px 4px 12px}.script-actions>*{flex:1}.teacher-script-output{padding:14px;font-size:13px}}
+@media(max-width:560px){.script-workspace{padding:5px 4px 10px}.script-actions>*{flex:1}.teacher-script-output{padding:15px;font-size:14px}.modalbar-actions{gap:5px}.modalopen{padding:7px 8px;font-size:11px}}
 
 #previewModal .modalframe{background:#080e18}
 body.modal-lock{overflow:hidden}
@@ -90,7 +90,7 @@ body.modal-lock{overflow:hidden}
 </section>
 <div class="footer">Flipbook Sensei · Google AI Mode workflow · No API key required</div>
 </main>
-<div class="modal" id="googleModal" role="dialog" aria-modal="true" aria-label="Teacher lesson script"><div class="modalbar"><span>✦ Teacher Lesson Script</span><div class="modalbar-actions"><button class="modalopen" id="downloadShot" type="button">Download screenshot ↓</button><button class="modalopen" id="copyPromptModal" type="button">Copy teacher prompt</button><button class="modalopen" id="openGoogleExternal" type="button">Open Google AI ↗</button><button class="modalclose" type="button" data-close="googleModal" aria-label="Close">×</button></div></div><div class="script-workspace"><div class="script-help">Google AI opens in a separate tab. Attach the downloaded flipbook screenshot and send the copied prompt. Return to this tab and paste Google's generated teacher script below. This modal will remain open when you return.</div><section id="pasteScriptPanel" class="paste-script-panel"><label for="googleAnswerInput">Paste Google's generated teacher script</label><textarea id="googleAnswerInput" class="field script-input" placeholder="Paste the complete Tagalog teacher script here…"></textarea><div class="script-actions"><button class="btn btn-primary" id="displayGoogleAnswer" type="button">Display teacher script</button></div></section><section id="teacherScriptPanel" class="teacher-script-panel" hidden><div class="script-actions"><button class="btn btn-secondary" id="editGoogleAnswer" type="button">Paste another answer</button><button class="btn btn-secondary" id="copyGoogleAnswer" type="button">Copy script</button><button class="btn btn-secondary" id="downloadGoogleAnswer" type="button">Download script</button></div><pre id="teacherScriptOutput" class="teacher-script-output"></pre></section></div></div>
+<div class="modal" id="googleModal" role="dialog" aria-modal="true" aria-label="Teacher lesson script"><div class="modalbar"><span>✦ Teacher Lesson Script</span><div class="modalbar-actions"><button class="modalopen" id="copyImageAndOpenGoogle" type="button">Copy image + prompt &amp; open Google AI ↗</button><button class="modalopen" id="copyPromptModal" type="button">Copy prompt</button><button class="modalclose" type="button" data-close="googleModal" aria-label="Close">×</button></div></div><div class="script-workspace"><div class="script-help" id="googleHandoffStatus">Your flipbook screenshot and teacher prompt are ready. Click “Copy image + prompt &amp; open Google AI”. In Google AI, paste (Ctrl+V) into the message box, then generate. Return to this tab and paste Google's generated teacher script below.</div><section id="pasteScriptPanel" class="paste-script-panel"><label for="googleAnswerInput">Paste Google's generated teacher script</label><textarea id="googleAnswerInput" class="field script-input" placeholder="Paste the complete Tagalog teacher script here…"></textarea><div class="script-actions"><button class="btn btn-primary" id="displayGoogleAnswer" type="button">Display teacher script</button></div></section><section id="teacherScriptPanel" class="teacher-script-panel" hidden><div class="script-actions"><button class="btn btn-secondary" id="editGoogleAnswer" type="button">Paste another answer</button><button class="btn btn-secondary" id="copyGoogleAnswer" type="button">Copy script</button><button class="btn btn-secondary" id="downloadGoogleAnswer" type="button">Download script</button></div><pre id="teacherScriptOutput" class="teacher-script-output"></pre></section></div></div>
 <div class="modal" id="previewModal" role="dialog" aria-modal="true" aria-label="Full-screen flipbook preview"><div class="modalbar"><span>Flipbook preview</span><button class="modalclose" type="button" data-close="previewModal" aria-label="Close">×</button></div><div class="modalframe" id="largeViewer"></div></div>
 <script>
 const el=id=>document.getElementById(id);
@@ -109,8 +109,33 @@ async function copyTeacherPrompt(){
  catch{el("uploadStatus").textContent="Clipboard blocked. Copy the prompt from the lesson panel.";el("answer").textContent=lastPrompt;}
 }
 el("copyPromptModal").addEventListener("click",copyTeacherPrompt);
-el("downloadShot").addEventListener("click",()=>{if(!selectedFile){el("uploadStatus").textContent="Capture or select a screenshot first.";return;}const a=document.createElement("a");a.href=URL.createObjectURL(selectedFile);a.download=selectedFile.name||"flipbook-page.jpg";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000);});
-el("openGoogleExternal").addEventListener("click",()=>window.open(GOOGLE_AI_URL,"_blank","noopener,noreferrer"));
+async function copyImagePromptAndOpenGoogle(){
+ if(!selectedFile){el("googleHandoffStatus").textContent="Capture the flipbook page first.";return;}
+ if(!lastPrompt)lastPrompt=buildTeacherPrompt();
+ // Open synchronously from this click so popup blockers are less likely to block it.
+ const googleTab=window.open(GOOGLE_AI_URL,"_blank");
+ if(googleTab)try{googleTab.opener=null;}catch{}
+ const button=el("copyImageAndOpenGoogle");button.disabled=true;button.textContent="Copying…";
+ try{
+  if(!navigator.clipboard?.write||!window.ClipboardItem)throw new Error("This browser does not support copying an image and text together.");
+  let png=selectedPngBlob;
+  if(!png){const bitmap=await createImageBitmap(selectedFile);const canvas=document.createElement("canvas");canvas.width=bitmap.width;canvas.height=bitmap.height;canvas.getContext("2d").drawImage(bitmap,0,0);png=await new Promise(resolve=>canvas.toBlob(resolve,"image/png"));bitmap.close?.();}
+  if(!png)throw new Error("Could not prepare the flipbook image.");
+  const item=new ClipboardItem({
+   "image/png":png,
+   "text/plain":new Blob([lastPrompt],{type:"text/plain"})
+  });
+  await navigator.clipboard.write([item]);
+  el("googleHandoffStatus").textContent=googleTab
+   ?"Screenshot and Tagalog teacher prompt copied together. In the Google AI tab, click the message box and press Ctrl+V. Check that the image and prompt appear, then generate. Return here to paste the generated script."
+   :"Screenshot and prompt copied together, but the Google tab was blocked. Open Google AI using the button below and press Ctrl+V in its message box.";
+  button.textContent="Copied ✓";
+ }catch(error){
+  el("googleHandoffStatus").textContent="Google opened in a separate tab. Automatic combined clipboard copy was blocked: "+(error.message||"permission denied")+". Use “Copy prompt”, then attach the screenshot manually (the screenshot is still available in the preview).";
+  button.textContent="Retry copy + open Google AI";
+ }finally{button.disabled=false;}
+}
+el("copyImageAndOpenGoogle").addEventListener("click",copyImagePromptAndOpenGoogle);
 el("displayGoogleAnswer").addEventListener("click",()=>{
  const answer=el("googleAnswerInput").value.trim();
  if(!answer){el("googleAnswerInput").focus();return;}
@@ -134,7 +159,7 @@ document.addEventListener("keydown",event=>{if(event.key==="Escape")document.que
 el("maximizePreview").addEventListener("click",()=>{const frame=el("viewer").querySelector("iframe");if(!frame){el("bookStatus").textContent="Open a flipbook first.";return;}const copy=frame.cloneNode(true);copy.style.cssText="width:100%;height:100%;border:0;background:#fff";el("largeViewer").replaceChildren(copy);openModal("previewModal");});
 
 const DEFAULT_BOOK="https://online.fliphtml5.com/Sibayan_Sensei/Day-1-Kaigo/#p=1";
-let selectedFile=null,previewUrl=null,lastPrompt="";
+let selectedFile=null,selectedPngBlob=null,previewUrl=null,lastPrompt="";
 function validBookUrl(value){const url=new URL(value);if(!["https:","http:"].includes(url.protocol))throw new Error("Enter a valid http or https URL.");return url;}
 function showBook(){try{const url=validBookUrl(el("bookUrl").value.trim());el("bookUrl").value=url.href;const frame=document.createElement("iframe");frame.title="FlipHTML5 lesson preview";frame.allowFullscreen=true;frame.loading="lazy";frame.referrerPolicy="strict-origin-when-cross-origin";frame.src=url.href;el("viewer").replaceChildren(frame);el("bookStatus").textContent="Flipbook opened";const match=url.hash.match(/(?:^|[&#])p=(\d+)/);el("pageNumber").value=match?match[1]:"1";}catch(error){el("bookStatus").textContent=error.message;}}
 el("bookForm").addEventListener("submit",event=>{event.preventDefault();showBook();});
@@ -150,6 +175,8 @@ async function teachSelectedPage(){
  setAnswer("Handa na ang screenshot at teacher prompt. Buksan ang Google AI sa hiwalay na tab, pagkatapos ay bumalik dito at i-paste ang generated teacher script.");
  el("googleAnswerInput").value="";
  el("pasteScriptPanel").hidden=false;el("teacherScriptPanel").hidden=true;
+ el("googleHandoffStatus").textContent="Your flipbook screenshot and teacher prompt are ready. Click “Copy image + prompt & open Google AI”. In Google AI, paste (Ctrl+V) into the message box, then generate. Return to this tab and paste the generated teacher script.";
+ el("copyImageAndOpenGoogle").disabled=false;el("copyImageAndOpenGoogle").textContent="Copy image + prompt & open Google AI ↗";
  openModal("googleModal");
 }
 el("teachButton").addEventListener("click",teachSelectedPage);
@@ -187,6 +214,7 @@ async function capturePreviewPage(){
   canvas.width=Math.round(width*scale);canvas.height=Math.round(height*scale);
   canvas.getContext("2d").drawImage(video,x,y,width,height,0,0,canvas.width,canvas.height);
   const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/jpeg",.92));if(!blob)throw Error("Hindi nagawa ang screenshot.");
+  selectedPngBlob=await new Promise(resolve=>canvas.toBlob(resolve,"image/png"));if(!selectedPngBlob)throw Error("Hindi naihanda ang image para sa clipboard.");
   selectedFile=new File([blob],"flipbook-page-"+(Number(el("pageNumber").value)||1)+".jpg",{type:"image/jpeg"});
   if(previewUrl)URL.revokeObjectURL(previewUrl);previewUrl=URL.createObjectURL(selectedFile);
   el("previewThumb").src=previewUrl;el("fileLabel").textContent=selectedFile.name;el("imagePreview").classList.add("visible");
