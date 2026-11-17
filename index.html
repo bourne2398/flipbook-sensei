@@ -112,10 +112,7 @@ el("copyPromptModal").addEventListener("click",copyTeacherPrompt);
 async function copyImagePromptAndOpenGoogle(){
  if(!selectedFile){el("googleHandoffStatus").textContent="Capture the flipbook page first.";return;}
  if(!lastPrompt)lastPrompt=buildTeacherPrompt();
- // Open synchronously from this click so popup blockers are less likely to block it.
- const googleTab=window.open(GOOGLE_AI_URL,"_blank");
- if(googleTab)try{googleTab.opener=null;}catch{}
- const button=el("copyImageAndOpenGoogle");button.disabled=true;button.textContent="Copying…";
+ const button=el("copyImageAndOpenGoogle");button.disabled=true;button.textContent="Copying…";let googleTab=null;
  try{
   if(!navigator.clipboard?.write||!window.ClipboardItem)throw new Error("This browser does not support copying an image and text together.");
   let png=selectedPngBlob;
@@ -125,13 +122,19 @@ async function copyImagePromptAndOpenGoogle(){
    "image/png":png,
    "text/plain":new Blob([lastPrompt],{type:"text/plain"})
   });
-  await navigator.clipboard.write([item]);
+  // Start clipboard write while this tab still has focus, then open Google in the same click.
+  const clipboardWrite=navigator.clipboard.write([item]);
+  googleTab=window.open(GOOGLE_AI_URL,"_blank");
+  if(googleTab)try{googleTab.opener=null;}catch{}
+  await clipboardWrite;
   el("googleHandoffStatus").textContent=googleTab
    ?"Screenshot and Tagalog teacher prompt copied together. In the Google AI tab, click the message box and press Ctrl+V. Check that the image and prompt appear, then generate. Return here to paste the generated script."
    :"Screenshot and prompt copied together, but the Google tab was blocked. Open Google AI using the button below and press Ctrl+V in its message box.";
   button.textContent="Copied ✓";
  }catch(error){
-  el("googleHandoffStatus").textContent="Google opened in a separate tab. Automatic combined clipboard copy was blocked: "+(error.message||"permission denied")+". Use “Copy prompt”, then attach the screenshot manually (the screenshot is still available in the preview).";
+  if(!googleTab)googleTab=window.open(GOOGLE_AI_URL,"_blank");
+  if(googleTab)try{googleTab.opener=null;}catch{}
+  el("googleHandoffStatus").textContent="Google AI was opened. Automatic combined clipboard copy was blocked: "+(error.message||"permission denied")+". Use “Copy prompt”, then attach the screenshot manually.";
   button.textContent="Retry copy + open Google AI";
  }finally{button.disabled=false;}
 }
